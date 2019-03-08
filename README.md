@@ -11,3 +11,18 @@ Available departments are:
 
 
 Please note the script **does not perform appointment booking**, it just tells you current status, so you may run it with cron and\or add some custom notifier.
+
+
+## Usage
+
+Edit script content and select what type of appointments you actually need:
+
+    appointments = get_termins(DMV, 'FS Umschreibung Ausländischer FS')
+    # appointments = get_termins(CityHall, 'An- oder Ummeldung - Einzelperson')
+    # appointments = get_termins(ForeignLabor, 'Niederlassungserlaubnis Blaue Karte EU')
+
+Run the script
+
+    python3 termin.py
+
+Output will be printed in the console
