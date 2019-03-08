@@ -151,6 +151,74 @@ class CityHall(Buro):
         ]
 
 
+class ForeignLabor(Buro):
+    @staticmethod
+    def get_name():
+        return 'Foreign Labor Department / Ausländerbehörde'
+
+    @staticmethod
+    def _get_base_page():
+        # Apparently there is no single page for all appointments publicly available
+        return 'https://www.muenchen.de/rathaus/Stadtverwaltung/Kreisverwaltungsreferat/Auslaenderwesen/Terminvereinbarung-.html'
+
+    @staticmethod
+    def get_frame_url():
+        return 'https://www46.muenchen.de/termin/index.php?loc=ABH'
+
+    @staticmethod
+    def get_available_appointment_types():
+        return [
+            'Aufenthaltserlaubnis Blaue Karte EU',
+            'Aufenthaltserlaubnis Blaue Karte EU (inländ. Hochschulabsolvent)',
+            'Aufenthaltserlaubnis für Forschende',
+            'Aufenthaltserlaubnis für Gastwissenschaftler, wissenschaftliche Mitarbeiter',
+            'Aufenthaltserlaubnis zum Studium',
+            'Aufenthaltserlaubnis zur Studienvorbereitung',
+            'Aufenthaltserlaubnis für Doktoranden',
+            'Fachrichtungswechsel',
+            'Facharztausbildung',
+            'Niederlassungserlaubnis allgemein',
+            'Niederlassungserlaubnis Blaue Karte EU',
+            'Aufenthaltserlaubnis zur Beschäftigung (Fachkräfte / Mangelberufe)',
+            'Aufenthaltserlaubnis zur Arbeitsplatzsuche',
+            'Selbständige und freiberufliche Erwerbstätigkeit',
+            'Ehegattennachzug zum Drittstaatsangehörigen',
+            'Eigenständiges Aufenthaltsrecht',
+            'Aufenthaltserlaubnis für Kinder',
+            'Familiennachzug in Ausnahmefällen',
+            'Familiennachzug (SCIF)',
+            'Familiennachzug (Stu)',
+            'Verpflichtungserklärung (langfristige Aufenthalte)',
+            'Verpflichtungserklärung (kurzfristige Aufenthalte)',
+            'Erlöschen des Aufenthaltstitels, § 51 AufenthG',
+            'Übertrag Aufenthaltstitel in neuen Pass',
+            'Bescheinigung (Aufenthaltsstatus)',
+            'Aufenthaltserlaubnis für langfristig Aufenthaltsberechtigte',
+            'Niederlassungserlaubnis für Familienangehörige von Deutschen',
+            'Niederlassungserlaubnis ab 16 Jahren',
+            'Aufenthaltserlaubnis zur betrieblichen Ausbildung',
+            'Aufenthaltserlaubnis zur Beschäftigung',
+            'Niederlassungserlaubnis Asyl / int. Schutzberechtigte',
+            'Familiennachzug zu EU-Staatsangehörigen',
+            'Daueraufenthaltsbescheinigung',
+            'Abholung elektronischer Aufenthaltstitel  (eAT)',
+            'Abholung elektronischer Reiseausweis (eRA)',
+            'Schülersammelliste',
+            'Aufenthaltserlaubnis aus humanitären Gründen',
+            'Medizinische Behandlung (Privatpatienten)',
+            'Medizinische Behandlung (Botschaftspatienten)',
+            'Werkverträge',
+            'Firmenkunden',
+            'Aufenthaltserlaubnis zur Arbeitsplatzsuche (16 V)',
+            'Niederlassungserlaubnis für Hochqualifizierte',
+            'Änderung der Nebenbestimmungen (AE)',
+            'Niederlassungserlaubnis für Absolventen dt. Hochschulen',
+            'Beratung allgemein',
+            'Familiennachzug zu dt. Staatsangehörigen',
+            'Aufenthaltserlaubnis zum Deutschintensivkurs',
+        ]
+
+
 def write_response_to_log(txt):
     with open('log.txt', 'w', encoding='utf-8') as f:
         f.write(txt)
@@ -207,9 +275,12 @@ def get_termins(buro, termin_type):
 if __name__ == '__main__':
     # Example for exchanging driver license
     appointments = get_termins(DMV, 'FS Umschreibung Ausländischer FS')
-    
+
     # # Example for Anmeldung
     # appointments = get_termins(CityHall, 'An- oder Ummeldung - Einzelperson')
+
+    # # Example for NE with Blue Card
+    # appointments = get_termins(ForeignLabor, 'Niederlassungserlaubnis Blaue Karte EU')
 
     if appointments:
         print(json.dumps(appointments, sort_keys=True, indent=4, separators=(',', ': ')))
