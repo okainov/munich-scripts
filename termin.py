@@ -3,65 +3,177 @@ import re
 import json
 
 
+class Meta(type):
+    def __repr__(cls):
+        return cls.get_name()
+
+
+class Buro(metaclass=Meta):
+    """
+    Base interface-like class for all departments providing appointments on ...muenchen.de/termin/index.php... page
+    """
+
+    @staticmethod
+    def get_available_appointment_types():
+        """
+        :return: list of available appointment types
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def get_frame_url():
+        """
+        :return: URL with appointments form
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def _get_base_page():
+        """
+        :return: actual external web-page containing the frame. Not really needed for implementation, but may be useful
+        for testing or debugging
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def get_name():
+        """
+        :return: human-readable name of the buro
+        """
+        raise NotImplementedError
+
+
+class DMV(Buro):
+    @staticmethod
+    def get_name():
+        return 'Department of Motor Vehicles / Führerscheinstelle'
+
+    @staticmethod
+    def _get_base_page():
+        return 'https://www.muenchen.de/rathaus/terminvereinbarung_fs.html'
+
+    @staticmethod
+    def get_frame_url():
+        return 'https://www22.muenchen.de/termin/index.php?loc=FS'
+
+    @staticmethod
+    def get_available_appointment_types():
+        return [
+            'FS Fahrerlaubnis erstmalig',
+            'FS Erweiterung Fahrerlaubnis',
+            'FS Erweiterung C und D',
+            'FS Verlängerung des Prüfauftrags',
+            'FS Führerschein mit 17',
+            'FS Umtausch in Kartenführerschein',
+            'FS Abnutzung, Namensänderung',
+            'FS Ersatzführerschein',
+            'FS Karteikartenabschnitt',
+            'FS Internationaler FS beantragen',
+            'FS Umschreibung EU EWR FS beantragen',
+            'FS Umschreibung Ausländischer FS',
+            'FS Verlängerung der Fahrberechtigung bei befristetem Aufenthalt',
+            'FS Verlängerung C- D-Klasse',
+            'FS Eintragung BKFQ ohne Verlängerung',
+            'FS Fahrerlaubnis nach Entzug',
+            'FS Zuerkennung der ausländischen Fahrerlaubnis',
+            'FS PBS für Taxi etc beantragen',
+            'FS PBS verlängern',
+            'FS Ersatz PBS',
+            'FS Dienstführerschein umschreiben',
+            'FS Internationaler FS bei Besitz',
+            'FS Abholung Führerschein',
+            'FS Auskünfte lfd Antrag allgemein',
+            'FS Auskünfte lfd Antrag Begutachtung',
+            'FS Auskünfte lfd Antrag Betäubungsmittel',
+            'FS Auskunft zur Entziehung des Führerscheins',
+            'FS Anmeldung und Vereinbarung Prüftermin',
+            'FS Allgemeine Information zur Ortskundeprüfung',
+            'FS Besprechung des Prüfungsergebnisses',
+            'FS Beratung Fahreignung',
+        ]
+
+
+class CityHall(Buro):
+    @staticmethod
+    def get_name():
+        return 'City Hall / Bürgerbüro'
+
+    @staticmethod
+    def _get_base_page():
+        return 'https://www.muenchen.de/rathaus/terminvereinbarung_bb.html'
+
+    @staticmethod
+    def get_frame_url():
+        return 'https://www56.muenchen.de/termin/index.php?loc=BB'
+
+    @staticmethod
+    def get_available_appointment_types():
+        return [
+            'An- oder Ummeldung - Einzelperson',
+            'An- oder Ummeldung - Einzelperson mit eigenen Fahrzeugen',
+            'An- oder Ummeldung - Familie',
+            'An- oder Ummeldung - Familie mit eigenen Fahrzeugen',
+            'Eintragung Übermittlungssperre',
+            'Meldebescheinigung',
+            'Haushaltsbescheinigung',
+            'Melderegisterauskunft',
+            'Abmeldung (Einzelperson oder Familie)',
+            'Familienstandsänderung/ Namensänderung',
+            'Antrag Personalausweis',
+            'Antrag Reisepass/Expressreisepass',
+            'Antrag vorläufiger Reisepass',
+            'Antrag oder Verlängerung/Aktualisierung Kinderreisepass',
+            'Ausweisdokumente - Familie (Minderjährige und deren gesetzliche Vertreter)',
+            'Nachträgliche Anschriftenänderung Personalausweis/Reisepass/eAT',
+            'Nachträgliches Einschalten eID / Nachträgliche Änderung PIN',
+            'Widerruf der Verlust- oder Diebstahlanzeige von Personalausweis oder Reisepass',
+            'Verlust- oder Diebstahlanzeige von Personalausweis',
+            'Verlust- oder Diebstahlanzeige von Reisepass',
+            'Gewerbeummeldung (Adressänderung innerhalb Münchens)',
+            'Gewerbeabmeldung',
+            'Führungszeugnis beantragen',
+            'Gewerbezentralregisterauskunft beantragen – natürliche Person',
+            'Gewerbezentralregisterauskunft beantragen – juristische Person',
+            'Bis zu 5 Beglaubigungen Unterschrift',
+            'Bis zu 5 Beglaubigungen Dokument',
+            'Bis zu 20 Beglaubigungen',
+            'Fabrikneues Fahrzeug anmelden (mit deutschen Fahrzeugpapieren und CoC)',
+            'Fahrzeug wieder anmelden',
+            'Fahrzeug umschreiben von außerhalb nach München',
+            'Fahrzeug umschreiben innerhalb Münchens',
+            'Fahrzeug außer Betrieb setzen',
+            'Saisonkennzeichen beantragen',
+            'Kurzzeitkennzeichen beantragen',
+            'Umweltplakette/ Feinstaubplakette für Umweltzone beantragen',
+            'Adressänderung in Fahrzeugpapiere eintragen lassen',
+            'Namensänderung in Fahrzeugpapiere eintragen lassen',
+            'Verlust oder Diebstahl der Zulassungsbescheinigung Teil I',
+        ]
+
+
 def write_response_to_log(txt):
     with open('log.txt', 'w', encoding='utf-8') as f:
         f.write(txt)
 
 
-def get_termins(termin_type='FS Umschreibung Ausländischer FS'):
+def get_termins(buro, termin_type):
     """
-    Get termins status for given type.
-    Base page https://www.muenchen.de/rathaus/terminvereinbarung_fs.html,
-    and the frame for termins is https://www22.muenchen.de/termin/index.php?loc=FS
+    Get available appointments in the given buro for the given appointment type.
+    :param buro: Buro to search in
     :param termin_type: what type of appointment do you want to find?
     :return: dictionary of appointments, keys are possible dates, values are lists of available times
     """
 
-    TERMIN_URL = 'https://www22.muenchen.de/termin/index.php?loc=FS&ct=1071898'
-
-    # Which type of termin - change foreign driver license
-    # Other available types:
-    # 'CASETYPES[FS Fahrerlaubnis erstmalig]':0,
-    # 'CASETYPES[FS Erweiterung Fahrerlaubnis]':0,
-    # 'CASETYPES[FS Erweiterung C und D]':0,
-    # 'CASETYPES[FS Verlängerung des Prüfauftrags]':0,
-    # 'CASETYPES[FS Führerschein mit 17]':0,
-    # 'CASETYPES[FS Umtausch in Kartenführerschein]':0,
-    # 'CASETYPES[FS Abnutzung, Namensänderung]':0,
-    # 'CASETYPES[FS Ersatzführerschein]':0,
-    # 'CASETYPES[FS Karteikartenabschnitt]':0,
-    # 'CASETYPES[FS Internationaler FS beantragen]':0,
-    # 'CASETYPES[FS Umschreibung EU EWR FS beantragen]':0,
-    # 'CASETYPES[FS Verlängerung der Fahrberechtigung bei befristetem Aufenthalt]':0,
-    # 'CASETYPES[FS Verlängerung C- D-Klasse]':0,
-    # 'CASETYPES[FS Eintragung BKFQ ohne Verlängerung]':0,
-    # 'CASETYPES[FS Fahrerlaubnis nach Entzug]':0,
-    # 'CASETYPES[FS Zuerkennung der ausländischen Fahrerlaubnis]':0,
-    # 'CASETYPES[FS PBS für Taxi etc beantragen]':0,
-    # 'CASETYPES[FS PBS verlängern]':0,
-    # 'CASETYPES[FS Ersatz PBS]':0,
-    # 'CASETYPES[FS Dienstführerschein umschreiben]':0,
-    # 'CASETYPES[FS Internationaler FS bei Besitz]':0,
-    # 'CASETYPES[FS Abholung Führerschein]':0,
-    # 'CASETYPES[FS Auskünfte lfd Antrag allgemein]':0,
-    # 'CASETYPES[FS Auskünfte lfd Antrag Begutachtung]':0,
-    # 'CASETYPES[FS Auskünfte lfd Antrag Betäubungsmittel]':0,
-    # 'CASETYPES[FS Auskunft zur Entziehung des Führerscheins]':0,
-    # 'CASETYPES[FS Anmeldung und Vereinbarung Prüftermin]':0,
-    # 'CASETYPES[FS Allgemeine Information zur Ortskundeprüfung]':0,
-    # 'CASETYPES[FS Besprechung des Prüfungsergebnisses]':0,
-    # 'CASETYPES[FS Beratung Fahreignung]':0,
-
     # Session is required to keep cookies between requests
     s = requests.Session()
     # First request to get and save cookies
-    s.post(TERMIN_URL)
+    s.post(buro.get_frame_url())
 
     termin_data = {
         'CASETYPES[%s]' % termin_type: 1,
         'step': 'WEB_APPOINT_SEARCH_BY_CASETYPES',
     }
-    response = s.post(TERMIN_URL, termin_data)
+    response = s.post(buro.get_frame_url(), termin_data)
     txt = response.text
 
     try:
@@ -72,24 +184,32 @@ def get_termins(termin_type='FS Umschreibung Ausländischer FS'):
         return None
 
     appointments = json.loads(json_str)
-
-    if len(appointments) != 1:
-        print('ERROR: termins json is malformed. See log.txt for json data')
-        write_response_to_log(str(appointments))
-        return None
-
-    try:
-        for key in appointments:
-            appointments = appointments[key]['appoints']
-    except TypeError:
-        print('ERROR: termins json is malformed. See log.txt for json data')
-        write_response_to_log(str(appointments))
-        return None
+    # We expect structure of this JSON should be like this:
+    # {
+    #     'Place ID 1': {
+    #         # Address
+    #         'caption': 'F\u00fchrerscheinstelle Garmischer Str. 19/21',
+    #         # Some internal ID
+    #         'id': 'a6a84abc3c8666ca80a3655eef15bade',
+    #         # Dictionary containing data about appointments
+    #         'appoints': {
+    #             '2019-01-25': ['09:05', '09:30'],
+    #             '2019-01-26': []
+    #             # ...
+    #         }
+    #     }
+    # }
+    # So there can be several Buros located in different places in the city
 
     return appointments
 
 
 if __name__ == '__main__':
-    appointments = get_termins()
+    # Example for exchanging driver license
+    appointments = get_termins(DMV, 'FS Umschreibung Ausländischer FS')
+    
+    # # Example for Anmeldung
+    # appointments = get_termins(CityHall, 'An- oder Ummeldung - Einzelperson')
+
     if appointments:
         print(json.dumps(appointments, sort_keys=True, indent=4, separators=(',', ': ')))
