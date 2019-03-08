@@ -2,8 +2,12 @@
 Some useful scripts simplifying bureaucracy, especially when living in Munich, Germany.
 
 # termin.py
-Small tool to show availability of appointments related to driver licenses such as foreign driver license exchange, EU driver license exchange and many others.
+Small tool to show availability of appointments in different Departments of Munich.
 
-Source of the data - https://www22.muenchen.de/termin/index.php?loc=FS&ct=1071898
+Available departments are:
+- Ausländerbehörde (foreign nationals affairs, residence permits, work visas etc.)
+- Bürgerbüro (civil affairs, residence registration etc.)
+- Führerscheinstelle (driver license and motor vehicles affairs)
 
-Please note the script **does not perform appointment booking**, it just tells you current status, so you may run it with crone and\or add some custom notifier.
+
+Please note the script **does not perform appointment booking**, it just tells you current status, so you may run it with cron and\or add some custom notifier.
