@@ -46,7 +46,7 @@ class Buro(metaclass=Meta):
 class DMV(Buro):
     @staticmethod
     def get_name():
-        return 'Department of Motor Vehicles / Führerscheinstelle'
+        return 'Führerscheinstelle'
 
     @staticmethod
     def _get_base_page():
@@ -96,7 +96,7 @@ class DMV(Buro):
 class CityHall(Buro):
     @staticmethod
     def get_name():
-        return 'City Hall / Bürgerbüro'
+        return 'Bürgerbüro'
 
     @staticmethod
     def _get_base_page():
@@ -154,7 +154,7 @@ class CityHall(Buro):
 class ForeignLabor(Buro):
     @staticmethod
     def get_name():
-        return 'Foreign Labor Department / Ausländerbehörde'
+        return 'Ausländerbehörde'
 
     @staticmethod
     def _get_base_page():
