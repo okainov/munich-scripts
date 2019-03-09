@@ -1,14 +1,4 @@
 # -*- coding: utf-8 -*-
-# This program is dedicated to the public domain under the CC0 license.
-
-"""
-<Ask for language>
-Provide list of Buros, ask for buro
-provide list of services, ask for service
-Reply with list of appointments
-
-"""
-
 import logging
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
@@ -27,8 +17,10 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
+SELECTING_TERMIN_TYPE, QUERING_TERMINS = range(2)
 
-def start(update, context):
+
+def selecting_buro(update, context):
     buttons = []
     deps = termin.Buro.__subclasses__()
     for dep in deps:
@@ -47,7 +39,7 @@ def start(update, context):
         'Hi! Here are available departments. Please select one',
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
 
-    return BURO
+    return SELECTING_TERMIN_TYPE
 
 
 def error(update, context):
@@ -55,13 +47,10 @@ def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
-BURO, TERMIN_TYPE = range(2)
-
-
-def buro(update, context):
+def select_termin_type(update, context):
     if update.callback_query and update.callback_query.data == '_REUSE':
         # All data already stored in user_data and user asked to repeat
-        return termin_type(update, context, True)
+        return quering_termins(update, context, True)
     elif not update.callback_query:
         # We returned from previous step, but buro is already known
         department = context.user_data['buro']
@@ -77,10 +66,10 @@ def buro(update, context):
         'There are several appointment types available. Please send the number of the desired appointment:\n%s' % '\n'.join(
             ['%s: %s' % (i, x) for i, x in enumerate(app_types, 1)]))
 
-    return TERMIN_TYPE
+    return QUERING_TERMINS
 
 
-def termin_type(update, context, reuse=False):
+def quering_termins(update, context, reuse=False):
     department = context.user_data['buro']
     if not reuse:
         msg = update.message
@@ -89,7 +78,7 @@ def termin_type(update, context, reuse=False):
         except IndexError:
             msg.reply_text(
                 'Looks like invalid number, please try again')
-            return buro(update, context)
+            return select_termin_type(update, context)
         context.user_data['termin_type'] = termin_type_str
     else:
         msg = update.callback_query.message
@@ -117,7 +106,7 @@ def termin_type(update, context, reuse=False):
     if not found_any:
         msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
 
-    return start(update, context)
+    return selecting_buro(update, context)
 
 
 def main():
@@ -126,20 +115,17 @@ def main():
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
     updater = Updater(BOT_TOKEN, use_context=True)
-
-    # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-    # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start, pass_user_data=True)],
+        entry_points=[CommandHandler('start', selecting_buro, pass_user_data=True)],
 
         states={
-            BURO: [CallbackQueryHandler(buro, pass_user_data=True)],
-            TERMIN_TYPE: [MessageHandler(Filters.text, termin_type)],
+            SELECTING_TERMIN_TYPE: [CallbackQueryHandler(select_termin_type, pass_user_data=True)],
+            QUERING_TERMINS: [MessageHandler(Filters.text, quering_termins)],
         },
 
-        fallbacks=[CommandHandler('start', start)],
+        fallbacks=[CommandHandler('start', selecting_buro)],
         allow_reentry=True
     )
     dp.add_handler(conv_handler)
