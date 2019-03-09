@@ -13,7 +13,11 @@ Available departments are:
 Please note the script **does not perform appointment booking**, it just tells you current status, so you may run it with cron and\or add some custom notifier.
 
 
-## Usage
+## Telegram bot
+
+There is a simple Telegram bot at [@MunichTerminBot](https://t.me/MunichTerminBot) using `termin.py` functionality. The bot is written using [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library. Source code is also in this repo, `tg_bot.py`.
+
+## Script usage
 
 Edit script content and select what type of appointments you actually need:
 
