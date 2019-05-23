@@ -35,6 +35,7 @@ Pre-requisites:
  - `TG_TOKEN` environment variable is set in Heroku settings
  - `HEROKU_APP_NAME` environment variable is set in Heroku settings.
 
+Commands for manual deploy
 
     heroku login
     heroku container:login
