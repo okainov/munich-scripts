@@ -17,15 +17,24 @@ Please note the script **does not perform appointment booking**, it just tells y
 
 There is a simple Telegram bot at [@MunichTerminBot](https://t.me/MunichTerminBot) using `termin.py` functionality. The bot is written using [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library. Source code is also in this repo, `tg_bot.py`.
 
+### Development
+
+By default bot runs as webhook configured for Heroku. For local development it's easier to use polling and in order to get it, just set `DEBUG = True` in one of first lines of the script.
+
 ### Bot deployment
 
-Bot is hosted on Heroku, runnning in Docker and can be deployed similar to one of [manuals](https://medium.com/python4you/creating-telegram-bot-and-deploying-it-on-heroku-471de1d96554). 
+Bot is hosted on Heroku, runnning in Docker and automatic deploy from `master` branch of this repoi is set, no action should be required.
+
+#### Manual deployment
+
+Similar to one of basic [manuals](https://medium.com/python4you/creating-telegram-bot-and-deploying-it-on-heroku-471de1d96554). 
 
 Pre-requisites:
  
- - Having Heroku CLI installed.
- - Having `TG_TOKEN` environment variable set up in Heroku app
- 
+ - Heroku CLI installed.
+ - `TG_TOKEN` environment variable is set in Heroku settings
+ - `HEROKU_APP_NAME` environment variable is set in Heroku settings.
+
 
     heroku login
     heroku container:login
@@ -34,7 +43,7 @@ Pre-requisites:
     
 Shortly after deploy make sure everything is running
 
-    heroku logs --tail --app <HEROKU_APP_NAME>
+    heroku logs --tail --app munich-termin-bot
 
 ## Script usage
 
