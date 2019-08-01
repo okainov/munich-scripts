@@ -2,6 +2,7 @@
 import logging
 import os
 import requests
+from datetime import datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -25,14 +26,13 @@ logger = logging.getLogger(__name__)
 SELECTING_TERMIN_TYPE, QUERING_TERMINS, SCHEDULE_APPOINTMENT, SELECT_INTERVAL, STOP_CHECKING = range(5)
 
 scheduler = BackgroundScheduler()
-scheduled_jobs = set()
+scheduled_jobs = {}
 
 
 def selecting_buro(update, context):
     # remove scheduled job for user when restarting bot
     user_id = str(update.effective_user.id)
-    if user_id in scheduled_jobs:
-        remove_job(user_id)
+    remove_job(user_id)
 
     buttons = []
     deps = termin.Buro.__subclasses__()
@@ -135,7 +135,7 @@ def set_retry_interval(update, context):
         return selecting_buro(update, context)
     else:
         msg = update.callback_query.message if update.callback_query else update.message
-        msg.reply_text('Please type interval in minutes')
+        msg.reply_text('Please type interval in minutes. Interval should greater or equals 15 minutes.')
         return SELECT_INTERVAL
 
 
@@ -149,10 +149,16 @@ def print_available_termins(update, context):
     msg = update.message
 
     appointments = termin.get_termins(department, termin_type_str)
+    found_any = False
     for k, v in appointments.items():
         for date in v['appoints']:
             if v['appoints'][date]:
+                found_any = True
                 msg.reply_text('Available appointments on date %s are %s' % (date, '\n'.join(v['appoints'][date])))
+
+    # smth was found, print unsubscribe button
+    if found_any:
+        print_unsubscribe_button(msg)
 
 
 def start_interval_checking(update, context):
@@ -162,35 +168,37 @@ def start_interval_checking(update, context):
     msg = update.message
     minutes = update.message.text
 
-    # check interval greater than 0
+    # check interval at least 15 mins
     valid_interval = True
     try:
-        if int(minutes) < 1:
+        if int(minutes) < 15:
             valid_interval = False
     except ValueError:
         valid_interval = False
 
     if not valid_interval:
-        msg.reply_text('Interval should positive and not equal to 0')
+        msg.reply_text('Interval should be greater or equals 15 minutes')
         return set_retry_interval(update, context)
 
     user_id = str(update.effective_user.id)
 
     scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=user_id)
-    scheduled_jobs.add(user_id)
+    scheduled_jobs[user_id] = datetime.now()
 
     msg.reply_text("Ok, I've started continuous checking with interval " + minutes + " minutes")
     msg.reply_text("I will notify you if something is available")
 
-    buttons = [InlineKeyboardButton(text="Stop checking", callback_data="stop")]
-    custom_keyboard = [buttons]
+    print_unsubscribe_button(msg)
 
-    msg = update.message
+    return STOP_CHECKING
+
+
+def print_unsubscribe_button(msg):
+    buttons = [InlineKeyboardButton(text="Unsubscribe", callback_data="stop")]
+    custom_keyboard = [buttons]
     msg.reply_text(
         'You can stop checking',
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
-
-    return STOP_CHECKING
 
 
 def stop_checking(update, context):
@@ -200,14 +208,22 @@ def stop_checking(update, context):
 
 
 def remove_job(user_id):
-    scheduler.remove_job(user_id)
-    scheduled_jobs.remove(user_id)
+    # if user does not have a subscription, we want to avoid an error
+    if user_id in scheduled_jobs.keys():
+        scheduled_jobs.pop(user_id, None)
+        scheduler.remove_job(user_id)
 
 
-def ping_myself(app_name):
+def ping_myself_and_clear_jobs(app_name):
     url = "https://{}.herokuapp.com/".format(app_name)
     logger.info("Pinging myself at " + str(url))
     requests.request('get', url)
+
+    # remove jobs scheduled more than a week ago
+    to_remove = list(k for k, v in scheduled_jobs.items() if (datetime.now() - v).days >= 7)
+    for user_id in to_remove:
+        remove_job(user_id)
+        logger.info('Job for user "%s" removed since it was scheduled more than a week ago', user_id)
 
 
 def main():
@@ -253,7 +269,7 @@ def main():
                               url_path=BOT_TOKEN)
         updater.bot.set_webhook("https://{}.herokuapp.com/{}".format(HEROKU_APP_NAME, BOT_TOKEN))
         # heroku makes the app sleep after an hour of no incoming requests, so we will ping our app every 20 minutes
-        scheduler.add_job(ping_myself, "interval", args=[HEROKU_APP_NAME], minutes=20, id="ping")
+        scheduler.add_job(ping_myself_and_clear_jobs, "interval", args=[HEROKU_APP_NAME], minutes=20, id="ping")
 
 
 if __name__ == '__main__':
