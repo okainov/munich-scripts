@@ -100,34 +100,42 @@ def quering_termins(update, context, reuse=False):
     msg.reply_text(
         'Great, wait a second while I\'m fetching available appointments for %s...' % termin_type_str)
 
-    appointments = termin.get_termins(department, termin_type_str)
+    appointments = get_available_appointments(department, termin_type_str)
+    if len(appointments) > 0:
+        for caption, date, time in appointments:
+            msg.reply_text('The nearest appointments at %s are at %s:\n%s' % (
+                caption, date, '\n'.join(time)))
+    else:
+        msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
 
-    found_any = False
+    buttons = [InlineKeyboardButton(text="Subscribe", callback_data="subscribe"),
+               InlineKeyboardButton(text="No, return back", callback_data="return")]
+    custom_keyboard = [buttons]
+
+    msg.reply_text(
+        'If you want, you can subscribe on available appointments of this type',
+        reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
+
+    return SCHEDULE_APPOINTMENT
+
+
+def get_available_appointments(department, termin_type):
+    appointments = termin.get_termins(department, termin_type)
+
+    # list of tuples: (caption, date, time)
+    available_appointments = []
     for k, v in appointments.items():
         caption = v['caption']
         first_date = None
         for date in v['appoints']:
             if v['appoints'][date]:
                 first_date = date
-                found_any = True
                 break
 
         if first_date:
-            msg.reply_text('The nearest appointments at %s are at %s:\n%s' % (
-                caption, first_date, '\n'.join(v['appoints'][first_date])))
+            available_appointments.append((caption, first_date, v['appoints'][first_date]))
 
-    if not found_any:
-        msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
-
-    buttons = [InlineKeyboardButton(text="Schedule", callback_data="schedule"),
-               InlineKeyboardButton(text="No, return back", callback_data="return")]
-    custom_keyboard = [buttons]
-
-    msg.reply_text(
-        'If you want, you can schedule checking appointments of this type by interval',
-        reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
-
-    return SCHEDULE_APPOINTMENT
+    return available_appointments
 
 
 def set_retry_interval(update, context):
@@ -148,16 +156,13 @@ def print_available_termins(update, context):
 
     msg = update.message
 
-    appointments = termin.get_termins(department, termin_type_str)
-    found_any = False
-    for k, v in appointments.items():
-        for date in v['appoints']:
-            if v['appoints'][date]:
-                found_any = True
-                msg.reply_text('Available appointments on date %s are %s' % (date, '\n'.join(v['appoints'][date])))
+    appointments = get_available_appointments(department, termin_type_str)
+    if len(appointments) > 0:
+        for caption, date, time in appointments:
+            msg.reply_text('The nearest appointments at %s are at %s:\n%s' % (
+                caption, date, '\n'.join(time)))
 
-    # smth was found, print unsubscribe button
-    if found_any:
+        # something was found, print subscribe button
         print_unsubscribe_button(msg)
 
 
@@ -185,7 +190,7 @@ def start_interval_checking(update, context):
     scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=user_id)
     scheduled_jobs[user_id] = datetime.now()
 
-    msg.reply_text("Ok, I've started continuous checking with interval " + minutes + " minutes")
+    msg.reply_text("Ok, I've started subscription with checking interval " + minutes + " minutes")
     msg.reply_text("I will notify you if something is available")
 
     print_unsubscribe_button(msg)
@@ -197,7 +202,7 @@ def print_unsubscribe_button(msg):
     buttons = [InlineKeyboardButton(text="Unsubscribe", callback_data="stop")]
     custom_keyboard = [buttons]
     msg.reply_text(
-        'You can stop checking',
+        'You can unsubscribe',
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
 
 
