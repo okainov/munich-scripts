@@ -31,10 +31,6 @@ scheduled_jobs = {}
 
 
 def selecting_buro(update, context):
-    # remove scheduled job for user when restarting bot
-    user_id = str(update.effective_user.id)
-    remove_job(user_id)
-
     buttons = []
     deps = termin.Buro.__subclasses__()
     for dep in deps:
@@ -189,6 +185,12 @@ def start_interval_checking(update, context):
         return set_retry_interval(update, context)
 
     user_id = str(update.effective_user.id)
+
+    # User cannot have two or more subscriptions
+    if user_id in scheduled_jobs:
+        msg.reply_text(
+            '⚠️ You had some subscription already. In order to activate the new check, I have removed the old one.')
+        remove_job(user_id)
 
     scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=user_id)
     scheduled_jobs[user_id] = datetime.now()
