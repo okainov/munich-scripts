@@ -1,5 +1,6 @@
 #Main dependencies for the script
 requests
+apscheduler
 
 # Dependencies for Telegram bot
 python-telegram-bot==12.0.0b1

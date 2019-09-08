@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
+import requests
+from datetime import datetime
+
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.ext.callbackqueryhandler import CallbackQueryHandler
@@ -19,10 +23,17 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-SELECTING_TERMIN_TYPE, QUERING_TERMINS = range(2)
+SELECTING_TERMIN_TYPE, QUERING_TERMINS, SCHEDULE_APPOINTMENT, SELECT_INTERVAL, STOP_CHECKING = range(5)
+
+scheduler = BackgroundScheduler()
+scheduled_jobs = {}
 
 
 def selecting_buro(update, context):
+    # remove scheduled job for user when restarting bot
+    user_id = str(update.effective_user.id)
+    remove_job(user_id)
+
     buttons = []
     deps = termin.Buro.__subclasses__()
     for dep in deps:
@@ -89,26 +100,135 @@ def quering_termins(update, context, reuse=False):
     msg.reply_text(
         'Great, wait a second while I\'m fetching available appointments for %s...' % termin_type_str)
 
-    appointments = termin.get_termins(department, termin_type_str)
+    appointments = get_available_appointments(department, termin_type_str)
+    if len(appointments) > 0:
+        for caption, date, time in appointments:
+            msg.reply_text('The nearest appointments at %s are at %s:\n%s' % (
+                caption, date, '\n'.join(time)))
+    else:
+        msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
 
-    found_any = False
+    buttons = [InlineKeyboardButton(text="Subscribe", callback_data="subscribe"),
+               InlineKeyboardButton(text="No, return back", callback_data="return")]
+    custom_keyboard = [buttons]
+
+    msg.reply_text(
+        'If you want, you can subscribe on available appointments of this type',
+        reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
+
+    return SCHEDULE_APPOINTMENT
+
+
+def get_available_appointments(department, termin_type):
+    appointments = termin.get_termins(department, termin_type)
+
+    # list of tuples: (caption, date, time)
+    available_appointments = []
     for k, v in appointments.items():
         caption = v['caption']
         first_date = None
         for date in v['appoints']:
             if v['appoints'][date]:
                 first_date = date
-                found_any = True
                 break
 
         if first_date:
+            available_appointments.append((caption, first_date, v['appoints'][first_date]))
+
+    return available_appointments
+
+
+def set_retry_interval(update, context):
+    if update.callback_query and update.callback_query.data == 'return':
+        return selecting_buro(update, context)
+    else:
+        msg = update.callback_query.message if update.callback_query else update.message
+        msg.reply_text('Please type interval in minutes. Interval should greater or equals 15 minutes.')
+        return SELECT_INTERVAL
+
+
+def print_available_termins(update, context):
+    """
+    Checks for available termins and prints them if any
+    """
+    department = context.user_data['buro']
+    termin_type_str = context.user_data['termin_type']
+
+    msg = update.message
+
+    appointments = get_available_appointments(department, termin_type_str)
+    if len(appointments) > 0:
+        for caption, date, time in appointments:
             msg.reply_text('The nearest appointments at %s are at %s:\n%s' % (
-                caption, first_date, '\n'.join(v['appoints'][first_date])))
+                caption, date, '\n'.join(time)))
 
-    if not found_any:
-        msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
+        # something was found, print subscribe button
+        print_unsubscribe_button(msg)
 
+
+def start_interval_checking(update, context):
+    """
+    Schedules a job for user which will check available appointments by interval
+    """
+    msg = update.message
+    minutes = update.message.text
+
+    # check interval at least 15 mins
+    valid_interval = True
+    try:
+        if int(minutes) < 15:
+            valid_interval = False
+    except ValueError:
+        valid_interval = False
+
+    if not valid_interval:
+        msg.reply_text('Interval should be greater or equals 15 minutes')
+        return set_retry_interval(update, context)
+
+    user_id = str(update.effective_user.id)
+
+    scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=user_id)
+    scheduled_jobs[user_id] = datetime.now()
+
+    msg.reply_text("Ok, I've started subscription with checking interval " + minutes + " minutes")
+    msg.reply_text("I will notify you if something is available")
+
+    print_unsubscribe_button(msg)
+
+    return STOP_CHECKING
+
+
+def print_unsubscribe_button(msg):
+    buttons = [InlineKeyboardButton(text="Unsubscribe", callback_data="stop")]
+    custom_keyboard = [buttons]
+    msg.reply_text(
+        'You can unsubscribe',
+        reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
+
+
+def stop_checking(update, context):
+    user_id = str(update.effective_user.id)
+    remove_job(user_id)
     return selecting_buro(update, context)
+
+
+def remove_job(user_id):
+    # if user does not have a subscription, we want to avoid an error
+    if user_id in scheduled_jobs.keys():
+        scheduled_jobs.pop(user_id, None)
+        scheduler.remove_job(user_id)
+
+
+def ping_myself_and_clear_jobs(app_name):
+    url = "https://{}.herokuapp.com/".format(app_name)
+    logger.info("Pinging myself at " + str(url))
+    requests.request('get', url)
+
+    # remove jobs scheduled more than a week ago
+    to_remove = list(k for k, v in scheduled_jobs.items() if (datetime.now() - v).days >= 7)
+    for user_id in to_remove:
+        remove_job(user_id)
+        logger.info('Job for user "%s" removed since it was scheduled more than a week ago', user_id)
 
 
 def main():
@@ -125,14 +245,19 @@ def main():
         states={
             SELECTING_TERMIN_TYPE: [CallbackQueryHandler(select_termin_type, pass_user_data=True)],
             QUERING_TERMINS: [MessageHandler(Filters.text, quering_termins)],
+            SCHEDULE_APPOINTMENT: [CallbackQueryHandler(set_retry_interval, pass_user_data=True)],
+            SELECT_INTERVAL: [MessageHandler(Filters.text, start_interval_checking)],
+            STOP_CHECKING: [CallbackQueryHandler(stop_checking, pass_user_data=True)]
         },
 
         fallbacks=[CommandHandler('start', selecting_buro)],
         allow_reentry=True
     )
     dp.add_handler(conv_handler)
-
     dp.add_error_handler(error)
+
+    # scheduler for checking appointments with interval
+    scheduler.start()
 
     # Start the Bot
     if DEBUG:
@@ -148,6 +273,8 @@ def main():
                               port=PORT,
                               url_path=BOT_TOKEN)
         updater.bot.set_webhook("https://{}.herokuapp.com/{}".format(HEROKU_APP_NAME, BOT_TOKEN))
+        # heroku makes the app sleep after an hour of no incoming requests, so we will ping our app every 20 minutes
+        scheduler.add_job(ping_myself_and_clear_jobs, "interval", args=[HEROKU_APP_NAME], minutes=20, id="ping")
 
 
 if __name__ == '__main__':
