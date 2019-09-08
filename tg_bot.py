@@ -70,11 +70,19 @@ def select_termin_type(update, context):
         department = getattr(termin, update.callback_query.data)
         context.user_data['buro'] = department
 
-    app_types = department.get_available_appointment_types()
+    buttons = []
+
+    for i, x in department.get_typical_appointments():
+        buttons.append([InlineKeyboardButton(text=x, callback_data=i)])
+    if department.get_typical_appointments():
+        buttons.append([InlineKeyboardButton(text='--------------', callback_data='-1')])
+
+    for i, x in enumerate(department.get_available_appointment_types()):
+        buttons.append([InlineKeyboardButton(text=x, callback_data=i)])
 
     msg.reply_text(
-        'There are several appointment types available. Please send the number of the desired appointment:\n%s' % '\n'.join(
-            ['%s: %s' % (i, x) for i, x in enumerate(app_types, 1)]))
+        'There are several appointment types available. Most used types are on top. Please select one',
+        reply_markup=InlineKeyboardMarkup(buttons, one_time_keyboard=True))
 
     return QUERING_TERMINS
 
@@ -82,13 +90,11 @@ def select_termin_type(update, context):
 def quering_termins(update, context, reuse=False):
     department = context.user_data['buro']
     if not reuse:
-        msg = update.message
-        try:
-            termin_type_str = department.get_available_appointment_types()[int(update.message.text) - 1]
-        except IndexError:
-            msg.reply_text(
-                'Looks like invalid number, please try again')
-            return select_termin_type(update, context)
+        index = int(update.callback_query.data)
+        if index < 0:
+            return QUERING_TERMINS
+        msg = update.callback_query.message
+        termin_type_str = department.get_available_appointment_types()[index]
         context.user_data['termin_type'] = termin_type_str
     else:
         msg = update.callback_query.message
@@ -251,7 +257,7 @@ def main():
 
         states={
             SELECTING_TERMIN_TYPE: [CallbackQueryHandler(select_termin_type, pass_user_data=True)],
-            QUERING_TERMINS: [MessageHandler(Filters.text, quering_termins)],
+            QUERING_TERMINS: [CallbackQueryHandler(quering_termins, pass_user_data=True)],
             SCHEDULE_APPOINTMENT: [CallbackQueryHandler(set_retry_interval, pass_user_data=True)],
             SELECT_INTERVAL: [MessageHandler(Filters.text, start_interval_checking)],
             STOP_CHECKING: [CallbackQueryHandler(stop_checking, pass_user_data=True)]

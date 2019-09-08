@@ -42,6 +42,13 @@ class Buro(metaclass=Meta):
         """
         raise NotImplementedError
 
+    @staticmethod
+    def get_typical_appointments() -> list:
+        """
+        :return: list of tuples (<Name of appointment>, <index>)
+        """
+        return []
+
 
 class DMV(Buro):
     @staticmethod
@@ -70,7 +77,7 @@ class DMV(Buro):
             'FS Karteikartenabschnitt',
             'FS Internationaler FS beantragen',
             'FS Umschreibung EU EWR FS beantragen',
-            'FS Umschreibung Ausländischer FS',
+            'FS Umschreibung Ausländischer FS',  # 11
             'FS Verlängerung der Fahrberechtigung bei befristetem Aufenthalt',
             'FS Verlängerung C- D-Klasse',
             'FS Eintragung BKFQ ohne Verlängerung',
@@ -91,6 +98,14 @@ class DMV(Buro):
             'FS Besprechung des Prüfungsergebnisses',
             'FS Beratung Fahreignung',
         ]
+
+    @staticmethod
+    def get_typical_appointments() -> list:
+        res = []
+        # Driver license exchange - FS Umschreibung Ausländischer FS
+        for index in [11]:
+            res.append((index, DMV.get_available_appointment_types()[index]))
+        return res
 
 
 class CityHall(Buro):
@@ -149,6 +164,14 @@ class CityHall(Buro):
             'Namensänderung in Fahrzeugpapiere eintragen lassen',
             'Verlust oder Diebstahl der Zulassungsbescheinigung Teil I',
         ]
+
+    @staticmethod
+    def get_typical_appointments() -> list:
+        res = []
+        # Anmeldungs and Abmeldung
+        for index in [0, 1, 2, 3, 8]:
+            res.append((index, CityHall.get_available_appointment_types()[index]))
+        return res
 
 
 class ForeignLabor(Buro):
@@ -217,6 +240,14 @@ class ForeignLabor(Buro):
             'Familiennachzug zu dt. Staatsangehörigen',
             'Aufenthaltserlaubnis zum Deutschintensivkurs',
         ]
+
+    @staticmethod
+    def get_typical_appointments() -> list:
+        res = []
+        # Blue Card and Students
+        for index in [0, 4]:
+            res.append((index, ForeignLabor.get_available_appointment_types()[index]))
+        return res
 
 
 def write_response_to_log(txt):
