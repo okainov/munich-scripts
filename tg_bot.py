@@ -15,6 +15,7 @@ from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
 import termin
 
 BOT_TOKEN = os.getenv("TG_TOKEN")
+MIN_CHECK_INTERVAL = 15
 DEBUG = False
 
 # Enable logging
@@ -103,7 +104,7 @@ def quering_termins(update, context, reuse=False):
     appointments = get_available_appointments(department, termin_type_str)
     if len(appointments) > 0:
         for caption, date, time in appointments:
-            msg.reply_text('The nearest appointments at %s are at %s:\n%s' % (
+            msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
     else:
         msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
@@ -113,7 +114,8 @@ def quering_termins(update, context, reuse=False):
     custom_keyboard = [buttons]
 
     msg.reply_text(
-        'If you want, you can subscribe on available appointments of this type',
+        'If you want, you can subscribe for available appointments of this type. '
+        'After then you will receive regular updates about available appointments for a week',
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
 
     return SCHEDULE_APPOINTMENT
@@ -143,7 +145,8 @@ def set_retry_interval(update, context):
         return selecting_buro(update, context)
     else:
         msg = update.callback_query.message if update.callback_query else update.message
-        msg.reply_text('Please type interval in minutes. Interval should greater or equals 15 minutes.')
+        msg.reply_text(
+            f'Please type interval in minutes. Interval should greater or equal than {MIN_CHECK_INTERVAL} minutes.')
         return SELECT_INTERVAL
 
 
@@ -159,7 +162,7 @@ def print_available_termins(update, context):
     appointments = get_available_appointments(department, termin_type_str)
     if len(appointments) > 0:
         for caption, date, time in appointments:
-            msg.reply_text('The nearest appointments at %s are at %s:\n%s' % (
+            msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
 
         # something was found, print subscribe button
@@ -173,16 +176,16 @@ def start_interval_checking(update, context):
     msg = update.message
     minutes = update.message.text
 
-    # check interval at least 15 mins
+    # check interval at least MIN_CHECK_INTERVAL mins
     valid_interval = True
     try:
-        if int(minutes) < 15:
+        if int(minutes) < MIN_CHECK_INTERVAL:
             valid_interval = False
     except ValueError:
         valid_interval = False
 
     if not valid_interval:
-        msg.reply_text('Interval should be greater or equals 15 minutes')
+        msg.reply_text(f'Interval should be greater or equals than {MIN_CHECK_INTERVAL} minutes')
         return set_retry_interval(update, context)
 
     user_id = str(update.effective_user.id)
@@ -190,8 +193,10 @@ def start_interval_checking(update, context):
     scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=user_id)
     scheduled_jobs[user_id] = datetime.now()
 
-    msg.reply_text("Ok, I've started subscription with checking interval " + minutes + " minutes")
-    msg.reply_text("I will notify you if something is available")
+    msg.reply_text(f"Ok, I've started subscription with checking interval {minutes} minutes\n"
+                   "I will notify you if something is available")
+    msg.reply_text("Please note the subscription will be automatically removed after one week "
+                   "if not cancelled manually before")
 
     print_unsubscribe_button(msg)
 
@@ -202,7 +207,7 @@ def print_unsubscribe_button(msg):
     buttons = [InlineKeyboardButton(text="Unsubscribe", callback_data="stop")]
     custom_keyboard = [buttons]
     msg.reply_text(
-        'You can unsubscribe',
+        'To unsubscribe click the button',
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
 
 
