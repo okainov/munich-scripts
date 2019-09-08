@@ -2,7 +2,7 @@
 import logging
 import os
 import requests
-from datetime import datetime
+import datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -67,7 +67,10 @@ def select_termin_type(update, context):
         msg = update.message
     else:
         msg = update.callback_query.message
-        department = getattr(termin, update.callback_query.data)
+        try:
+            department = getattr(termin, update.callback_query.data)
+        except AttributeError:
+            return SELECTING_TERMIN_TYPE
         context.user_data['buro'] = department
 
     buttons = []
@@ -103,12 +106,16 @@ def quering_termins(update, context, reuse=False):
     msg.reply_text(
         'Great, wait a second while I\'m fetching available appointments for %s...' % termin_type_str)
 
+    logger.info('Query for <%s> at %s' % (termin_type_str, department))
     appointments = get_available_appointments(department, termin_type_str)
     if len(appointments) > 0:
         for caption, date, time in appointments:
             msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
+            logger.info('Soonest appt at %s is %s days from today' %
+                        (caption, (datetime.datetime.strptime(date, '%Y-%m-%d').date() - datetime.date.today()).days))
     else:
+        logger.info('Nothing found')
         msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
 
     buttons = [InlineKeyboardButton(text="Subscribe", callback_data="subscribe"),
@@ -145,6 +152,12 @@ def get_available_appointments(department, termin_type):
 def set_retry_interval(update, context):
     if update.callback_query and update.callback_query.data == 'return':
         return selecting_buro(update, context)
+    elif update.callback_query and update.callback_query.data.isnumeric():
+        # User clicked on some termin from the previous message, need to redirect
+        department = context.user_data['buro']
+        termin_type_str = department.get_available_appointment_types()[int(update.callback_query.data)]
+        context.user_data['termin_type'] = termin_type_str
+        return quering_termins(update, context, True)
     else:
         msg = update.callback_query.message if update.callback_query else update.message
         msg.reply_text(
@@ -199,7 +212,7 @@ def start_interval_checking(update, context):
         remove_job(user_id)
 
     scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=user_id)
-    scheduled_jobs[user_id] = datetime.now()
+    scheduled_jobs[user_id] = datetime.datetime.now()
 
     msg.reply_text(f"Ok, I've started subscription with checking interval {minutes} minutes\n"
                    "I will notify you if something is available")
@@ -238,7 +251,7 @@ def ping_myself_and_clear_jobs(app_name):
     requests.request('get', url)
 
     # remove jobs scheduled more than a week ago
-    to_remove = list(k for k, v in scheduled_jobs.items() if (datetime.now() - v).days >= 7)
+    to_remove = list(k for k, v in scheduled_jobs.items() if (datetime.datetime.now() - v).days >= 7)
     for user_id in to_remove:
         remove_job(user_id)
         logger.info('Job for user "%s" removed since it was scheduled more than a week ago', user_id)
