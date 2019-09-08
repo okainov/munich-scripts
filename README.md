@@ -10,20 +10,20 @@ Available departments are:
 - Führerscheinstelle (driver license and motor vehicles affairs)
 
 
-Please note the script **does not perform appointment booking**, it just tells you current status, so you may run it with cron and\or add some custom notifier.
+Please note the script **does not perform appointment booking** (see [#4](https://github.com/okainov/munich-scripts/issues/4)), it just tells you current status, so you may run it with cron and\or add some custom notifier.
 
 
 ## Telegram bot
 
-There is a simple Telegram bot at [@MunichTerminBot](https://t.me/MunichTerminBot) using `termin.py` functionality. The bot is written using [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library. Source code is also in this repo, `tg_bot.py`.
+There is a Telegram bot at [@MunichTerminBot](https://t.me/MunichTerminBot) using `termin.py` functionality. The bot is written using [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library. Source code is also in this repo, `tg_bot.py`.
 
 ### Development
 
-By default bot runs as webhook configured for Heroku. For local development it's easier to use polling and in order to get it, just set `DEBUG = True` in one of first lines of the script.
+By default bot runs as webhook configured for Heroku. For local development it's easier to use polling. In order to get it, just set `DEBUG = True` in one of first lines of the script.
 
 ### Bot deployment
 
-Bot is hosted on Heroku, runnning in Docker and automatic deploy from `master` branch of this repoi is set, no action should be required.
+Bot is hosted on Heroku, running in Docker and automatic deploy from `master` branch of this repo is set, no action should be required.
 
 #### Manual deployment
 
@@ -34,6 +34,14 @@ Pre-requisites:
  - Heroku CLI installed.
  - `TG_TOKEN` environment variable is set in Heroku settings
  - `HEROKU_APP_NAME` environment variable is set in Heroku settings.
+
+ If you want to enable Elastic statistics, then additionally set following variables:
+
+ - `ELASTIC_HOST` - hostname where ELK stack is deployed
+ - `ELASTIC_USER` - ElasticSearch username
+ - `ELASTIC_PASS` - ElasticSearch password
+
+ Alternatively, you can disable metrics collection by setting `COLLECT_METRICS` to `False`
 
 Commands for manual deploy
 
