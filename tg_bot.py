@@ -12,6 +12,7 @@ from telegram.ext.conversationhandler import ConversationHandler
 from telegram.inline.inlinekeyboardbutton import InlineKeyboardButton
 from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
 
+import metrics
 import termin
 
 BOT_TOKEN = os.getenv("TG_TOKEN")
@@ -106,16 +107,14 @@ def quering_termins(update, context, reuse=False):
     msg.reply_text(
         'Great, wait a second while I\'m fetching available appointments for %s...' % termin_type_str)
 
-    logger.info('Query for <%s> at %s' % (termin_type_str, department))
+    metrics.log_search(user=update.effective_user.id, buro=department, appointment=termin_type_str)
+
     appointments = get_available_appointments(department, termin_type_str)
     if len(appointments) > 0:
         for caption, date, time in appointments:
             msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
-            logger.info('Soonest appt at %s is %s days from today' %
-                        (caption, (datetime.datetime.strptime(date, '%Y-%m-%d').date() - datetime.date.today()).days))
     else:
-        logger.info('Nothing found')
         msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
 
     buttons = [InlineKeyboardButton(text="Subscribe", callback_data="subscribe"),
@@ -131,6 +130,8 @@ def quering_termins(update, context, reuse=False):
 
 
 def get_available_appointments(department, termin_type):
+    logger.info('Query for <%s> at %s' % (termin_type, department))
+
     appointments = termin.get_termins(department, termin_type)
 
     # list of tuples: (caption, date, time)
@@ -141,10 +142,19 @@ def get_available_appointments(department, termin_type):
         for date in v['appoints']:
             if v['appoints'][date]:
                 first_date = date
+
+                next_in = (datetime.datetime.strptime(first_date, '%Y-%m-%d').date() - datetime.date.today()).days
+                logger.info('Soonest appt at %s is %s days from today' % (caption, next_in))
+                metrics.log_result(department, caption, termin_type, next_in, amount=len(v['appoints'][date]))
+
                 break
 
         if first_date:
             available_appointments.append((caption, first_date, v['appoints'][first_date]))
+
+    if not available_appointments:
+        logger.info('Nothing found')
+        metrics.log_result(department, place="", appointment=termin_type)
 
     return available_appointments
 
@@ -213,6 +223,9 @@ def start_interval_checking(update, context):
 
     scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=user_id)
     scheduled_jobs[user_id] = datetime.datetime.now()
+
+    metrics.log_subscription(buro=context.user_data['buro'], appointment=context.user_data['termin_type'],
+                             interval=minutes, user=int(user_id))
 
     msg.reply_text(f"Ok, I've started subscription with checking interval {minutes} minutes\n"
                    "I will notify you if something is available")
