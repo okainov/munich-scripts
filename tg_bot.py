@@ -50,7 +50,7 @@ def selecting_buro(update, context):
         msg = update.callback_query.message
 
     msg.reply_text(
-        'Hi! Here are available departments. Please select one',
+        'Hi! Here are available departments. Please select one:',
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
 
     return SELECTING_TERMIN_TYPE
