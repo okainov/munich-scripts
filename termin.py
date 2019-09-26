@@ -244,8 +244,8 @@ class ForeignLabor(Buro):
     @staticmethod
     def get_typical_appointments() -> list:
         res = []
-        # Blue Card and Students
-        for index in [0, 4]:
+        # Blue Card, Students and NE
+        for index in [0, 4, 10]:
             res.append((index, ForeignLabor.get_available_appointment_types()[index]))
         return res
 
