@@ -250,6 +250,66 @@ class ForeignLabor(Buro):
         return res
 
 
+class KFZ(Buro):
+    @staticmethod
+    def get_name():
+        return 'Kfz-Zulassung'
+
+    @staticmethod
+    def _get_base_page():
+        return 'https://www.muenchen.de/rathaus/terminvereinbarung_kfz.html'
+
+    @staticmethod
+    def get_frame_url():
+        return 'https://www22.muenchen.de/termin/index.php?loc=KFZ'
+
+    @staticmethod
+    def get_available_appointment_types():
+        return ['ZUL Fabrikneues Fahrzeug',
+                'ZUL Umschreibung innerhalb',
+                'ZUL Umschreibung außerhalb',
+                'ZUL Wiederanmeldung',
+                'ZUL Vorabzuteilung',
+                'LEAS Fabrikneues Fahrzeug',
+                'LEAS Umschreibung innerhalb',
+                'LEAS Umschreibung außerhalb',
+                'LEAS Wiederanmeldung',
+                'LEAS Adressänderung',
+                'LEAS Namensänderung',
+                'LEAS Technische Änderung',
+                'LEAS Saisonkennzeichen',
+                'LEAS Wechselkennzeichen',
+                'LEAS Verlust Zulassungsbescheinigung Teil I',
+                'LEAS Verlust Kennzeichen',
+                'ZUL IS Einfuhr Neu Ausland',
+                'ZUL IS Einfuhr Gebraucht Ausland',
+                'ZUL IS Kurzzeitkennzeichen',
+                'ZUL IS Vorbereitung Kennzeichen',
+                'ZUL IS Eigenbauten Gutachten',
+                'ZUL Adressänderung',
+                'ZUL Namensänderung',
+                'ZUL Technische Änderung',
+                'ZUL Umweltplakette',
+                'ZUL Auskunft',
+                'ZUL Halter- und Datenbestätigung',
+                'ZUL Saisonkennzeichen',
+                'ZUL Kurzzeitkennzeichen',
+                'ZUL Wechselkennzeichen',
+                'ZUL Historisches Kennzeichen',
+                'ZUL Verlust Zulassungsbescheinigung Teil I',
+                'ZUL Verlust Zulassungsbescheinigung Teil II',
+                'ZUL Verlust Kennzeichen',
+                ]
+
+    @staticmethod
+    def get_typical_appointments() -> list:
+        res = []
+        # Initial registration and address changge
+        for index in [0, 1, 2, 21]:
+            res.append((index, KFZ.get_available_appointment_types()[index]))
+        return res
+
+
 def write_response_to_log(txt):
     with open('log.txt', 'w', encoding='utf-8') as f:
         f.write(txt)
@@ -312,6 +372,9 @@ if __name__ == '__main__':
 
     # # Example for NE with Blue Card
     # appointments = get_termins(ForeignLabor, 'Niederlassungserlaubnis Blaue Karte EU')
+
+    # # Example for KFZ and car registration
+    # appointments = get_termins(KFZ, 'ZUL Fabrikneues Fahrzeug')
 
     if appointments:
         print(json.dumps(appointments, sort_keys=True, indent=4, separators=(',', ': ')))
