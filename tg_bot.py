@@ -122,6 +122,7 @@ def quering_termins(update, context, reuse=False):
             msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
         # msg.reply_text('Please book your appointment here: %s' %   ) # I need to include the link here
+        msg.reply_text('This is a test messsage') # I need to include the link here`
     else:
         msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
 

@@ -184,7 +184,7 @@ class ForeignLabor(Buro):
         # Apparently there is no single page for all appointments publicly available
         # return 'https://www.muenchen.de/rathaus/Stadtverwaltung/Kreisverwaltungsreferat/Auslaenderwesen/Terminvereinbarung-.html'
 
-    # @staticmethod
+    @staticmethod
     def _get_base_page():
         return 'https://www.muenchen.de/rathaus/terminvereinbarung_abh.html?cts='
 
