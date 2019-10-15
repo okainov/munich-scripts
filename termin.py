@@ -193,7 +193,7 @@ class ForeignLabor(Buro):
             'Aufenthaltserlaubnis Blaue Karte EU',
             'Aufenthaltserlaubnis Blaue Karte EU (inländ. Hochschulabsolvent)',
             'Aufenthaltserlaubnis für Forschende',
-            'Aufenthaltserla`ubnis für Gastwissenschaftler, wissenschaftliche Mitarbeiter',
+            'Aufenthaltserlaubnis für Gastwissenschaftler, wissenschaftliche Mitarbeiter',
             'Aufenthaltserlaubnis zum Studium',
             'Aufenthaltserlaubnis zur Studienvorbereitung',
             'Aufenthaltserlaubnis für Doktoranden',
