@@ -18,21 +18,20 @@ BOT_TOKEN = os.getenv("TG_TOKEN")
 MIN_CHECK_INTERVAL = 15
 
 DEBUG = False
-# COLLECT_METRICS = True
+COLLECT_METRICS = True
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# metric_collector = MetricCollector(os.getenv('ELASTIC_HOST'), os.getenv('ELASTIC_USER'), os.getenv('ELASTIC_PASS'),
-                                #    debug_mode=not COLLECT_METRICS)
+metric_collector = MetricCollector(os.getenv('ELASTIC_HOST'), os.getenv('ELASTIC_USER'), os.getenv('ELASTIC_PASS'),
+                                   debug_mode=not COLLECT_METRICS)
 
 SELECTING_TERMIN_TYPE, QUERING_TERMINS, SCHEDULE_APPOINTMENT, SELECT_INTERVAL, STOP_CHECKING = range(5)
 
 scheduler = BackgroundScheduler()
 scheduled_jobs = {}
-
 
 def selecting_buro(update, context):
     buttons = []
@@ -97,10 +96,6 @@ def select_termin_type(update, context):
 def quering_termins(update, context, reuse=False):
     department = context.user_data['buro']
 
-    logger.info(department._get_base_page())
-
-
-
     if not reuse:
         index = int(update.callback_query.data)
         if index < 0:
@@ -115,18 +110,15 @@ def quering_termins(update, context, reuse=False):
     msg.reply_text(
         'Great, wait a second while I\'m fetching available appointments for %s...' % termin_type_str)
 
-    # metric_collector.log_search(user=update.effective_user.id, buro=department, appointment=termin_type_str)
+    metric_collector.log_search(user=update.effective_user.id, buro=department, appointment=termin_type_str)
 
     appointments = get_available_appointments(department, termin_type_str)
-
-    # I have the urls but I need to call the function so that I can have the url and then present it here.
 
     if len(appointments) > 0:
         for caption, date, time in appointments:
             msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
-        msg.reply_text('Please book your appointment here: %s' % department._get_base_page()) # I need to include the link here
-        # msg.reply_text('This is a test messsage') # I need to include the link here`
+        msg.reply_text('Please book your appointment here: %s' % department._get_base_page())
     else:
         msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
 
@@ -158,7 +150,7 @@ def get_available_appointments(department, termin_type):
 
                 next_in = (datetime.datetime.strptime(first_date, '%Y-%m-%d').date() - datetime.date.today()).days
                 logger.info('Soonest appt at %s is %s days from today' % (caption, next_in))
-                # metric_collector.log_result(department, caption, termin_type, next_in, amount=len(v['appoints'][date]))
+                metric_collector.log_result(department, caption, termin_type, next_in, amount=len(v['appoints'][date]))
 
                 break
 
@@ -167,7 +159,7 @@ def get_available_appointments(department, termin_type):
 
     if not available_appointments:
         logger.info('Nothing found')
-        # metric_collector.log_result(department, place="", appointment=termin_type)
+        metric_collector.log_result(department, place="", appointment=termin_type)
 
     return available_appointments
 
@@ -237,8 +229,8 @@ def start_interval_checking(update, context):
     scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=user_id)
     scheduled_jobs[user_id] = datetime.datetime.now()
 
-    # metric_collector.log_subscription(buro=context.user_data['buro'], appointment=context.user_data['termin_type'],
-                                    #   interval=minutes, user=int(user_id))
+    metric_collector.log_subscription(buro=context.user_data['buro'], appointment=context.user_data['termin_type'],
+                                      interval=minutes, user=int(user_id))
 
     msg.reply_text(f"Ok, I've started subscription with checking interval {minutes} minutes\n"
                    "I will notify you if something is available")

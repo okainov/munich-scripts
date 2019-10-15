@@ -179,11 +179,6 @@ class ForeignLabor(Buro):
     def get_name():
         return 'Ausländerbehörde'
 
-    # @staticmethod
-    # def _get_base_page():
-        # Apparently there is no single page for all appointments publicly available
-        # return 'https://www.muenchen.de/rathaus/Stadtverwaltung/Kreisverwaltungsreferat/Auslaenderwesen/Terminvereinbarung-.html'
-
     @staticmethod
     def _get_base_page():
         return 'https://www.muenchen.de/rathaus/terminvereinbarung_abh.html?cts='
@@ -198,7 +193,7 @@ class ForeignLabor(Buro):
             'Aufenthaltserlaubnis Blaue Karte EU',
             'Aufenthaltserlaubnis Blaue Karte EU (inländ. Hochschulabsolvent)',
             'Aufenthaltserlaubnis für Forschende',
-            'Aufenthaltserlaubnis für Gastwissenschaftler, wissenschaftliche Mitarbeiter',
+            'Aufenthaltserla`ubnis für Gastwissenschaftler, wissenschaftliche Mitarbeiter',
             'Aufenthaltserlaubnis zum Studium',
             'Aufenthaltserlaubnis zur Studienvorbereitung',
             'Aufenthaltserlaubnis für Doktoranden',
