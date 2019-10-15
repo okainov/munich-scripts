@@ -96,6 +96,11 @@ def select_termin_type(update, context):
 
 def quering_termins(update, context, reuse=False):
     department = context.user_data['buro']
+
+    logger.info(department._get_base_page())
+
+
+
     if not reuse:
         index = int(update.callback_query.data)
         if index < 0:
@@ -115,14 +120,13 @@ def quering_termins(update, context, reuse=False):
     appointments = get_available_appointments(department, termin_type_str)
 
     # I have the urls but I need to call the function so that I can have the url and then present it here.
-    # appointment_url = _get_base_page()
 
     if len(appointments) > 0:
         for caption, date, time in appointments:
             msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
-        # msg.reply_text('Please book your appointment here: %s' %   ) # I need to include the link here
-        msg.reply_text('This is a test messsage') # I need to include the link here`
+        msg.reply_text('Please book your appointment here: %s' % department._get_base_page()) # I need to include the link here
+        # msg.reply_text('This is a test messsage') # I need to include the link here`
     else:
         msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
 
