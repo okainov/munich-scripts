@@ -232,7 +232,7 @@ def start_interval_checking(update, context):
     scheduled_jobs[user_id] = datetime.datetime.now()
 
     # metric_collector.log_subscription(buro=context.user_data['buro'], appointment=context.user_data['termin_type'],
-                                      interval=minutes, user=int(user_id))
+                                    #   interval=minutes, user=int(user_id))
 
     msg.reply_text(f"Ok, I've started subscription with checking interval {minutes} minutes\n"
                    "I will notify you if something is available")
