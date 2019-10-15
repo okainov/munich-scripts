@@ -114,13 +114,14 @@ def quering_termins(update, context, reuse=False):
 
     appointments = get_available_appointments(department, termin_type_str)
 
-    appointment_url = _get_base_page()
+    # I have the urls but I need to call the function so that I can have the url and then present it here.
+    # appointment_url = _get_base_page()
 
     if len(appointments) > 0:
         for caption, date, time in appointments:
             msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
-        # msg.reply_text('Please book your appointment here:' %  )
+        # msg.reply_text('Please book your appointment here: %s' %   ) # I need to include the link here
     else:
         msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
 
