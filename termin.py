@@ -62,7 +62,7 @@ class DMV(Buro):
     @staticmethod
     def get_frame_url():
         return 'https://www22.muenchen.de/termin/index.php?loc=FS'
-
+    
     @staticmethod
     def get_available_appointment_types():
         return [
@@ -183,6 +183,10 @@ class ForeignLabor(Buro):
     def _get_base_page():
         # Apparently there is no single page for all appointments publicly available
         return 'https://www.muenchen.de/rathaus/Stadtverwaltung/Kreisverwaltungsreferat/Auslaenderwesen/Terminvereinbarung-.html'
+
+    # @staticmethod
+    # def _get_base_page():
+    #     return 'https://www.muenchen.de/rathaus/terminvereinbarung_abh.html?cts='
 
     @staticmethod
     def get_frame_url():
