@@ -33,7 +33,6 @@ SELECTING_TERMIN_TYPE, QUERING_TERMINS, SCHEDULE_APPOINTMENT, SELECT_INTERVAL, S
 scheduler = BackgroundScheduler()
 scheduled_jobs = {}
 
-
 def selecting_buro(update, context):
     buttons = []
     deps = termin.Buro.__subclasses__()
@@ -96,6 +95,7 @@ def select_termin_type(update, context):
 
 def quering_termins(update, context, reuse=False):
     department = context.user_data['buro']
+
     if not reuse:
         index = int(update.callback_query.data)
         if index < 0:
@@ -113,10 +113,12 @@ def quering_termins(update, context, reuse=False):
     metric_collector.log_search(user=update.effective_user.id, buro=department, appointment=termin_type_str)
 
     appointments = get_available_appointments(department, termin_type_str)
+
     if len(appointments) > 0:
         for caption, date, time in appointments:
             msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
+        msg.reply_text('Please book your appointment here: %s' % department._get_base_page())
     else:
         msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
 

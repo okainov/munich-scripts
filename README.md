@@ -10,8 +10,7 @@ Available departments are:
 - Führerscheinstelle (driver license and motor vehicles affairs)
 
 
-Please note the script **does not perform appointment booking** (see [#4](https://github.com/okainov/munich-scripts/issues/4)), it just tells you current status, so you may run it with cron and\or add some custom notifier.
-
+Please note the script **does not perform appointment booking** (see [#4](https://github.com/okainov/munich-scripts/issues/4)), it just tells you current status and allows you to subscribe to a notifier for one week.
 
 ## Telegram bot
 
