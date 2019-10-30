@@ -194,8 +194,8 @@ def print_available_termins(update, context):
         for caption, date, time in appointments:
             msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
-
-        # something was found, print subscribe button
+        msg.reply_text('Please book your appointment here: %s' % department._get_base_page())
+        # something was found, print unsubscribe button
         print_unsubscribe_button(msg)
 
 
