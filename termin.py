@@ -200,7 +200,7 @@ class ForeignLabor(Buro):
             'Fachrichtungswechsel',
             'Facharztausbildung',
             'Niederlassungserlaubnis allgemein',
-            'Niederlassungserlaubnis Blaue Karte EU',
+            'Niederlassungserlaubnis Blaue Karte EU - Beratung/ Antragstellung',
             'Aufenthaltserlaubnis zur Beschäftigung (Fachkräfte / Mangelberufe)',
             'Aufenthaltserlaubnis zur Arbeitsplatzsuche',
             'Selbständige und freiberufliche Erwerbstätigkeit',
