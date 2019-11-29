@@ -18,15 +18,15 @@ BOT_TOKEN = os.getenv("TG_TOKEN")
 MIN_CHECK_INTERVAL = 15
 
 DEBUG = False
-# COLLECT_METRICS = True
+COLLECT_METRICS = True
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# metric_collector = MetricCollector(os.getenv('ELASTIC_HOST'), os.getenv('ELASTIC_USER'), os.getenv('ELASTIC_PASS'),
-#                                    debug_mode=not COLLECT_METRICS)
+metric_collector = MetricCollector(os.getenv('ELASTIC_HOST'), os.getenv('ELASTIC_USER'), os.getenv('ELASTIC_PASS'),
+                                   debug_mode=not COLLECT_METRICS)
 
 SELECTING_TERMIN_TYPE, QUERING_TERMINS, SCHEDULE_APPOINTMENT, SELECT_INTERVAL, STOP_CHECKING = range(5)
 
