@@ -25,8 +25,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-metric_collector = MetricCollector(os.getenv('ELASTIC_HOST'), os.getenv('ELASTIC_USER'), os.getenv('ELASTIC_PASS'),
-                                   debug_mode=not COLLECT_METRICS)
+# metric_collector = MetricCollector(os.getenv('ELASTIC_HOST'), os.getenv('ELASTIC_USER'), os.getenv('ELASTIC_PASS'),
+#                                    debug_mode=not COLLECT_METRICS)
 
 SELECTING_TERMIN_TYPE, QUERING_TERMINS, SCHEDULE_APPOINTMENT, SELECT_INTERVAL, STOP_CHECKING = range(5)
 
@@ -36,6 +36,9 @@ scheduled_jobs = {}
 def selecting_buro(update, context):
     buttons = []
     deps = termin.Buro.__subclasses__()
+
+    user_id = str(update.effective_user.id)
+
     for dep in deps:
         buttons.append(InlineKeyboardButton(text=dep.get_name(), callback_data=dep.__name__))
     custom_keyboard = [buttons]
@@ -51,6 +54,11 @@ def selecting_buro(update, context):
     msg.reply_text(
         'Hi! Here are available departments. Please select one:',
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
+
+    if user_id in scheduled_jobs:
+        print_subscription_status(update, msg, context)
+
+    
 
     return SELECTING_TERMIN_TYPE
 
@@ -110,7 +118,7 @@ def quering_termins(update, context, reuse=False):
     msg.reply_text(
         'Great, wait a second while I\'m fetching available appointments for %s...' % termin_type_str)
 
-    metric_collector.log_search(user=update.effective_user.id, buro=department, appointment=termin_type_str)
+    # metric_collector.log_search(user=update.effective_user.id, buro=department, appointment=termin_type_str)
 
     appointments = get_available_appointments(department, termin_type_str)
 
@@ -150,7 +158,7 @@ def get_available_appointments(department, termin_type):
 
                 next_in = (datetime.datetime.strptime(first_date, '%Y-%m-%d').date() - datetime.date.today()).days
                 logger.info('Soonest appt at %s is %s days from today' % (caption, next_in))
-                metric_collector.log_result(department, caption, termin_type, next_in, amount=len(v['appoints'][date]))
+                # metric_collector.log_result(department, caption, termin_type, next_in, amount=len(v['appoints'][date]))
 
                 break
 
@@ -159,7 +167,7 @@ def get_available_appointments(department, termin_type):
 
     if not available_appointments:
         logger.info('Nothing found')
-        metric_collector.log_result(department, place="", appointment=termin_type)
+        # metric_collector.log_result(department, place="", appointment=termin_type)
 
     return available_appointments
 
@@ -219,6 +227,7 @@ def start_interval_checking(update, context):
         return set_retry_interval(update, context)
 
     user_id = str(update.effective_user.id)
+    limit = 'limit_subs'
 
     # User cannot have two or more subscriptions
     if user_id in scheduled_jobs:
@@ -228,12 +237,16 @@ def start_interval_checking(update, context):
 
     scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=user_id)
     scheduled_jobs[user_id] = datetime.datetime.now()
+    scheduled_jobs[limit] = datetime.datetime.now() + datetime.timedelta(days=7)
 
-    metric_collector.log_subscription(buro=context.user_data['buro'], appointment=context.user_data['termin_type'],
-                                      interval=minutes, user=int(user_id))
+    # metric_collector.log_subscription(buro=context.user_data['buro'], appointment=context.user_data['termin_type'],
+    #                                   interval=minutes, user=int(user_id))
 
     msg.reply_text(f"Ok, I've started subscription with checking interval {minutes} minutes\n"
                    "I will notify you if something is available")
+
+    print_subscription_status(update, msg, context)
+
     msg.reply_text("Please note the subscription will be automatically removed after one week "
                    "if not cancelled manually before")
 
@@ -250,6 +263,27 @@ def print_unsubscribe_button(msg):
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
 
 
+def print_subscription_status(update, msg, context): 
+    # include the parameters
+    """
+    Prints current subscription status
+    """
+    user_id = str(update.effective_user.id)
+
+    # format date 
+    subscription_limit = scheduled_jobs['limit_subs'].date()
+    date_object = subscription_limit.strftime("%d-%m-%Y")
+
+    # check if exists a schedule job
+    if user_id in scheduled_jobs:
+        msg.reply_text('Current subscription details:\n\n - Department: %s \n\n - Type: %s \n\n - Until: %s \n' % (
+                context.user_data['buro'], context.user_data['termin_type'], date_object))
+
+    # regardless of checking, prints every second day the status of schedule job
+
+    return
+
+
 def stop_checking(update, context):
     user_id = str(update.effective_user.id)
     remove_job(user_id)
@@ -261,6 +295,8 @@ def remove_job(user_id):
     if user_id in scheduled_jobs.keys():
         scheduled_jobs.pop(user_id, None)
         scheduler.remove_job(user_id)
+        msg.reply_text('There are no active subscriptions at the moment')
+        custom_keyboard.append([InlineKeyboardButton(text='Reuse last selection', callback_data='_REUSE')])
 
 
 def ping_myself_and_clear_jobs(app_name):
