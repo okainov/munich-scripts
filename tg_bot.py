@@ -294,9 +294,8 @@ def remove_job(user_id):
     # if user does not have a subscription, we want to avoid an error
     if user_id in scheduled_jobs.keys():
         scheduled_jobs.pop(user_id, None)
-        scheduler.remove_job(user_id)
         msg.reply_text('There are no active subscriptions at the moment')
-        custom_keyboard.append([InlineKeyboardButton(text='Reuse last selection', callback_data='_REUSE')])
+        scheduler.remove_job(user_id)
 
 
 def ping_myself_and_clear_jobs(app_name):
