@@ -55,10 +55,7 @@ def selecting_buro(update, context):
         'Hi! Here are available departments. Please select one:',
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
 
-    if user_id in scheduled_jobs:
-        print_subscription_status(update, msg, context)
-
-    
+    print_subscription_status(update, msg, context)
 
     return SELECTING_TERMIN_TYPE
 
@@ -237,7 +234,6 @@ def start_interval_checking(update, context):
 
     scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=user_id)
     scheduled_jobs[user_id] = datetime.datetime.now()
-    scheduled_jobs[limit] = datetime.datetime.now() + datetime.timedelta(days=7)
 
     metric_collector.log_subscription(buro=context.user_data['buro'], appointment=context.user_data['termin_type'],
                                       interval=minutes, user=int(user_id))
@@ -264,22 +260,20 @@ def print_unsubscribe_button(msg):
 
 
 def print_subscription_status(update, msg, context): 
-    # include the parameters
     """
     Prints current subscription status
     """
     user_id = str(update.effective_user.id)
 
+    # define subscription limit 
+    subscription_limit = scheduled_jobs[user_id].date() + datetime.timedelta(days=7)
     # format date 
-    subscription_limit = scheduled_jobs['limit_subs'].date()
     date_object = subscription_limit.strftime("%d-%m-%Y")
 
     # check if exists a schedule job
     if user_id in scheduled_jobs:
         msg.reply_text('Current subscription details:\n\n - Department: %s \n\n - Type: %s \n\n - Until: %s \n' % (
                 context.user_data['buro'], context.user_data['termin_type'], date_object))
-
-    # regardless of checking, prints every second day the status of schedule job
 
     return
 
@@ -290,11 +284,11 @@ def stop_checking(update, context):
     return selecting_buro(update, context)
 
 
-def remove_job(user_id):
+def remove_job(user_id, msg):
     # if user does not have a subscription, we want to avoid an error
     if user_id in scheduled_jobs.keys():
         scheduled_jobs.pop(user_id, None)
-        msg.reply_text('There are no active subscriptions at the moment')
+        msg.reply_text('You were unsubscribed successfully.')
         scheduler.remove_job(user_id)
 
 
