@@ -13,12 +13,16 @@ class Buro(metaclass=Meta):
     Base interface-like class for all departments providing appointments on ...muenchen.de/termin/index.php... page
     """
 
-    @staticmethod
-    def get_available_appointment_types():
+    @classmethod
+    def get_available_appointment_types(cls):
         """
         :return: list of available appointment types
         """
-        raise NotImplementedError
+        responce = requests.get(cls.get_frame_url())
+        # Search for text CASETYPES. So far the only issue was in "+" sign for CityHall in some service variable,
+        #  that's why exclude it from the name
+        types = re.findall('CASETYPES\[([^+]*?)\]', responce.content.decode("utf-8"))
+        return types
 
     @staticmethod
     def get_frame_url():
@@ -62,42 +66,6 @@ class DMV(Buro):
     @staticmethod
     def get_frame_url():
         return 'https://www22.muenchen.de/termin/index.php?loc=FS'
-    
-    @staticmethod
-    def get_available_appointment_types():
-        return [
-            'FS Fahrerlaubnis erstmalig',
-            'FS Erweiterung Fahrerlaubnis',
-            'FS Erweiterung C und D',
-            'FS Verlängerung des Prüfauftrags',
-            'FS Führerschein mit 17',
-            'FS Umtausch in Kartenführerschein',
-            'FS Abnutzung, Namensänderung',
-            'FS Ersatzführerschein',
-            'FS Karteikartenabschnitt',
-            'FS Internationaler FS beantragen',
-            'FS Umschreibung EU EWR FS beantragen',
-            'FS Umschreibung Ausländischer FS',  # 11
-            'FS Verlängerung der Fahrberechtigung bei befristetem Aufenthalt',
-            'FS Verlängerung C- D-Klasse',
-            'FS Eintragung BKFQ ohne Verlängerung',
-            'FS Fahrerlaubnis nach Entzug',
-            'FS Zuerkennung der ausländischen Fahrerlaubnis',
-            'FS PBS für Taxi etc beantragen',
-            'FS PBS verlängern',
-            'FS Ersatz PBS',
-            'FS Dienstführerschein umschreiben',
-            'FS Internationaler FS bei Besitz',
-            'FS Abholung Führerschein',
-            'FS Auskünfte lfd Antrag allgemein',
-            'FS Auskünfte lfd Antrag Begutachtung',
-            'FS Auskünfte lfd Antrag Betäubungsmittel',
-            'FS Auskunft zur Entziehung des Führerscheins',
-            'FS Anmeldung und Vereinbarung Prüftermin',
-            'FS Allgemeine Information zur Ortskundeprüfung',
-            'FS Besprechung des Prüfungsergebnisses',
-            'FS Beratung Fahreignung',
-        ]
 
     @staticmethod
     def get_typical_appointments() -> list:
@@ -122,54 +90,10 @@ class CityHall(Buro):
         return 'https://www56.muenchen.de/termin/index.php?loc=BB'
 
     @staticmethod
-    def get_available_appointment_types():
-        return [
-            'An- oder Ummeldung - Einzelperson',
-            'An- oder Ummeldung - Einzelperson mit eigenen Fahrzeugen',
-            'An- oder Ummeldung - Familie',
-            'An- oder Ummeldung - Familie mit eigenen Fahrzeugen',
-            'Eintragung Übermittlungssperre',
-            'Meldebescheinigung',
-            'Haushaltsbescheinigung',
-            'Melderegisterauskunft',
-            'Abmeldung (Einzelperson oder Familie)',
-            'Familienstandsänderung/ Namensänderung',
-            'Antrag Personalausweis',
-            'Antrag Reisepass/Expressreisepass',
-            'Antrag vorläufiger Reisepass',
-            'Antrag oder Verlängerung/Aktualisierung Kinderreisepass',
-            'Ausweisdokumente - Familie (Minderjährige und deren gesetzliche Vertreter)',
-            'Nachträgliche Anschriftenänderung Personalausweis/Reisepass/eAT',
-            'Nachträgliches Einschalten eID / Nachträgliche Änderung PIN',
-            'Widerruf der Verlust- oder Diebstahlanzeige von Personalausweis oder Reisepass',
-            'Verlust- oder Diebstahlanzeige von Personalausweis',
-            'Verlust- oder Diebstahlanzeige von Reisepass',
-            'Gewerbeummeldung (Adressänderung innerhalb Münchens)',
-            'Gewerbeabmeldung',
-            'Führungszeugnis beantragen',
-            'Gewerbezentralregisterauskunft beantragen – natürliche Person',
-            'Gewerbezentralregisterauskunft beantragen – juristische Person',
-            'Bis zu 5 Beglaubigungen Unterschrift',
-            'Bis zu 5 Beglaubigungen Dokument',
-            'Bis zu 20 Beglaubigungen',
-            'Fabrikneues Fahrzeug anmelden (mit deutschen Fahrzeugpapieren und CoC)',
-            'Fahrzeug wieder anmelden',
-            'Fahrzeug umschreiben von außerhalb nach München',
-            'Fahrzeug umschreiben innerhalb Münchens',
-            'Fahrzeug außer Betrieb setzen',
-            'Saisonkennzeichen beantragen',
-            'Kurzzeitkennzeichen beantragen',
-            'Umweltplakette/ Feinstaubplakette für Umweltzone beantragen',
-            'Adressänderung in Fahrzeugpapiere eintragen lassen',
-            'Namensänderung in Fahrzeugpapiere eintragen lassen',
-            'Verlust oder Diebstahl der Zulassungsbescheinigung Teil I',
-        ]
-
-    @staticmethod
     def get_typical_appointments() -> list:
         res = []
         # Anmeldungs and Abmeldung
-        for index in [0, 1, 2, 3, 8]:
+        for index in [0, 1, 2, 3, 4]:
             res.append((index, CityHall.get_available_appointment_types()[index]))
         return res
 
@@ -188,63 +112,10 @@ class ForeignLabor(Buro):
         return 'https://www46.muenchen.de/termin/index.php?loc=ABH'
 
     @staticmethod
-    def get_available_appointment_types():
-        return [
-            'Aufenthaltserlaubnis Blaue Karte EU',
-            'Aufenthaltserlaubnis Blaue Karte EU (inländ. Hochschulabsolvent)',
-            'Aufenthaltserlaubnis für Forschende',
-            'Aufenthaltserlaubnis für Gastwissenschaftler, wissenschaftliche Mitarbeiter',
-            'Aufenthaltserlaubnis zum Studium',
-            'Aufenthaltserlaubnis zur Studienvorbereitung',
-            'Aufenthaltserlaubnis für Doktoranden',
-            'Fachrichtungswechsel',
-            'Facharztausbildung',
-            'Niederlassungserlaubnis allgemein',
-            'Niederlassungserlaubnis Blaue Karte EU - Beratung/ Antragstellung',
-            'Aufenthaltserlaubnis zur Beschäftigung (Fachkräfte / Mangelberufe)',
-            'Aufenthaltserlaubnis zur Arbeitsplatzsuche',
-            'Selbständige und freiberufliche Erwerbstätigkeit',
-            'Ehegattennachzug zum Drittstaatsangehörigen',
-            'Eigenständiges Aufenthaltsrecht',
-            'Aufenthaltserlaubnis für Kinder',
-            'Familiennachzug in Ausnahmefällen',
-            'Familiennachzug (SCIF)',
-            'Familiennachzug (Stu)',
-            'Verpflichtungserklärung (langfristige Aufenthalte)',
-            'Verpflichtungserklärung (kurzfristige Aufenthalte)',
-            'Erlöschen des Aufenthaltstitels, § 51 AufenthG',
-            'Übertrag Aufenthaltstitel in neuen Pass',
-            'Bescheinigung (Aufenthaltsstatus)',
-            'Aufenthaltserlaubnis für langfristig Aufenthaltsberechtigte',
-            'Niederlassungserlaubnis für Familienangehörige von Deutschen',
-            'Niederlassungserlaubnis ab 16 Jahren',
-            'Aufenthaltserlaubnis zur betrieblichen Ausbildung',
-            'Aufenthaltserlaubnis zur Beschäftigung',
-            'Niederlassungserlaubnis Asyl / int. Schutzberechtigte',
-            'Familiennachzug zu EU-Staatsangehörigen',
-            'Daueraufenthaltsbescheinigung',
-            'Abholung elektronischer Aufenthaltstitel  (eAT)',
-            'Abholung elektronischer Reiseausweis (eRA)',
-            'Schülersammelliste',
-            'Aufenthaltserlaubnis aus humanitären Gründen',
-            'Medizinische Behandlung (Privatpatienten)',
-            'Medizinische Behandlung (Botschaftspatienten)',
-            'Werkverträge',
-            'Firmenkunden',
-            'Aufenthaltserlaubnis zur Arbeitsplatzsuche (16 V)',
-            'Niederlassungserlaubnis für Hochqualifizierte',
-            'Änderung der Nebenbestimmungen (AE)',
-            'Niederlassungserlaubnis für Absolventen dt. Hochschulen',
-            'Beratung allgemein',
-            'Familiennachzug zu dt. Staatsangehörigen',
-            'Aufenthaltserlaubnis zum Deutschintensivkurs',
-        ]
-
-    @staticmethod
     def get_typical_appointments() -> list:
         res = []
         # Blue Card, Students and NE
-        for index in [0, 4, 10]:
+        for index in [0, 4, 9]:
             res.append((index, ForeignLabor.get_available_appointment_types()[index]))
         return res
 
@@ -261,44 +132,6 @@ class KFZ(Buro):
     @staticmethod
     def get_frame_url():
         return 'https://www22.muenchen.de/termin/index.php?loc=KFZ'
-
-    @staticmethod
-    def get_available_appointment_types():
-        return ['ZUL Fabrikneues Fahrzeug',
-                'ZUL Umschreibung innerhalb',
-                'ZUL Umschreibung außerhalb',
-                'ZUL Wiederanmeldung',
-                'ZUL Vorabzuteilung',
-                'LEAS Fabrikneues Fahrzeug',
-                'LEAS Umschreibung innerhalb',
-                'LEAS Umschreibung außerhalb',
-                'LEAS Wiederanmeldung',
-                'LEAS Adressänderung',
-                'LEAS Namensänderung',
-                'LEAS Technische Änderung',
-                'LEAS Saisonkennzeichen',
-                'LEAS Wechselkennzeichen',
-                'LEAS Verlust Zulassungsbescheinigung Teil I',
-                'LEAS Verlust Kennzeichen',
-                'ZUL IS Einfuhr Neu Ausland',
-                'ZUL IS Einfuhr Gebraucht Ausland',
-                'ZUL IS Kurzzeitkennzeichen',
-                'ZUL IS Vorbereitung Kennzeichen',
-                'ZUL IS Eigenbauten Gutachten',
-                'ZUL Adressänderung',
-                'ZUL Namensänderung',
-                'ZUL Technische Änderung',
-                'ZUL Umweltplakette',
-                'ZUL Auskunft',
-                'ZUL Halter- und Datenbestätigung',
-                'ZUL Saisonkennzeichen',
-                'ZUL Kurzzeitkennzeichen',
-                'ZUL Wechselkennzeichen',
-                'ZUL Historisches Kennzeichen',
-                'ZUL Verlust Zulassungsbescheinigung Teil I',
-                'ZUL Verlust Zulassungsbescheinigung Teil II',
-                'ZUL Verlust Kennzeichen',
-                ]
 
     @staticmethod
     def get_typical_appointments() -> list:
@@ -370,7 +203,7 @@ if __name__ == '__main__':
     # appointments = get_termins(CityHall, 'An- oder Ummeldung - Einzelperson')
 
     # # Example for NE with Blue Card
-    # appointments = get_termins(ForeignLabor, 'Niederlassungserlaubnis Blaue Karte EU')
+    # appointments = get_termins(ForeignLabor, 'Niederlassungserlaubnis allgemein')
 
     # # Example for KFZ and car registration
     # appointments = get_termins(KFZ, 'ZUL Fabrikneues Fahrzeug')
