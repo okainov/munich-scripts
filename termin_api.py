@@ -195,6 +195,35 @@ class KFZ(Buro):
         return 'kfz'
 
 
+class Pension(Buro):
+    @staticmethod
+    def get_name():
+        return 'Versicherungsamt'
+
+    @staticmethod
+    def _get_base_page():
+        return 'https://www.muenchen.de/rathaus/terminvereinbarung_va.html'
+
+    @staticmethod
+    def get_frame_url():
+        return 'https://www5.muenchen.de/termin/index.php?loc=VA'
+
+    @staticmethod
+    def get_typical_appointments() -> list:
+        res = []
+        # Pension information for NE
+        for index in [6]:
+            res.append((index, Pension.get_available_appointment_types()[index]))
+        return res
+
+    @staticmethod
+    def get_id():
+        """
+        :return: machine-readable unique ID of the buro
+        """
+        return 'va'
+
+
 def write_response_to_log(txt):
     with open('log.txt', 'w', encoding='utf-8') as f:
         f.write(txt)

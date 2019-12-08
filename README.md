@@ -5,9 +5,11 @@ Some useful scripts simplifying bureaucracy, especially when living in Munich, G
 Small tool to show availability of appointments in different Departments of Munich.
 
 Available departments are:
-- Ausländerbehörde (foreign nationals affairs, residence permits, work visas etc.)
-- Bürgerbüro (civil affairs, residence registration etc.)
-- Führerscheinstelle (driver license and motor vehicles affairs)
+- [Ausländerbehörde](https://www.muenchen.de/rathaus/Stadtverwaltung/Kreisverwaltungsreferat/Auslaenderwesen.html) (foreign nationals affairs, residence permits, work visas etc.)
+- [Bürgerbüro](https://www.muenchen.de/rathaus/Stadtverwaltung/Kreisverwaltungsreferat/Buergerbuero.html) (civil affairs, residence registration etc.)
+- [Führerscheinstelle](https://www.muenchen.de/rathaus/Stadtverwaltung/Kreisverwaltungsreferat/Verkehr/Fuehrerschein.html) (driver license affairs)
+- [Kfz-Zulassungstelle](https://www.muenchen.de/rathaus/Stadtverwaltung/Kreisverwaltungsreferat/Verkehr/KFZ-Zulassung.html) (motor vehicles affairs, registration, license plate and so on)
+- [Versicherungsamt](https://www.muenchen.de/rathaus/Stadtverwaltung/Kreisverwaltungsreferat/Versicherungsamt.html) (Pension-related stuff, i.e. getting information about your contribution, necessary for NE)
 
 
 Please note the script **does not perform appointment booking** (see [#4](https://github.com/okainov/munich-scripts/issues/4)), it just tells you current status and allows you to subscribe to a notifier for one week.
@@ -25,8 +27,6 @@ By default bot runs as webhook configured for personal web server. For local dev
 Bot is hosted on personal web server, running in Docker and automatic deploy from `master` branch of this repo is set, no action should be required.
 
 #### Manual deployment
-
-Similar to one of basic [manuals](https://medium.com/python4you/creating-telegram-bot-and-deploying-it-on-heroku-471de1d96554). 
 
 Pre-requisites:
 
