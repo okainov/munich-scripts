@@ -17,18 +17,15 @@ import termin
 from metrics import MetricCollector
 
 BOT_TOKEN = os.getenv("TG_TOKEN")
-MIN_CHECK_INTERVAL = 15
-
-DEBUG = False
-COLLECT_METRICS = not DEBUG
+MIN_CHECK_INTERVAL_MINUTES = os.getenv("MIN_CHECK_INTERVAL_MINUTES", 15)
+DEBUG = True if os.getenv("DEBUG") else False
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-metric_collector = MetricCollector(os.getenv('ELASTIC_HOST'), os.getenv('ELASTIC_USER'), os.getenv('ELASTIC_PASS'),
-                                   debug_mode=not COLLECT_METRICS)
+metric_collector = MetricCollector(os.getenv('ELASTIC_HOST', ''), os.getenv('ELASTIC_USER', ''), os.getenv('ELASTIC_PASS', ''))
 
 SELECTING_TERMIN_TYPE, QUERING_TERMINS, SCHEDULE_APPOINTMENT, SELECT_INTERVAL, STOP_CHECKING = range(5)
 
@@ -182,7 +179,7 @@ def set_retry_interval(update, context):
     else:
         msg = update.callback_query.message if update.callback_query else update.message
         msg.reply_text(
-            f'Please type interval in minutes. Interval should greater or equal than {MIN_CHECK_INTERVAL} minutes.')
+            f'Please type interval in minutes. Interval should greater or equal than {MIN_CHECK_INTERVAL_MINUTES} minutes.')
         return SELECT_INTERVAL
 
 
@@ -215,13 +212,13 @@ def start_interval_checking(update: Update, context):
     # check interval at least MIN_CHECK_INTERVAL mins
     valid_interval = True
     try:
-        if int(minutes) < MIN_CHECK_INTERVAL:
+        if int(minutes) < MIN_CHECK_INTERVAL_MINUTES:
             valid_interval = False
     except ValueError:
         valid_interval = False
 
     if not valid_interval:
-        msg.reply_text(f'Interval should be greater or equals than {MIN_CHECK_INTERVAL} minutes')
+        msg.reply_text(f'Interval should be greater or equals than {MIN_CHECK_INTERVAL_MINUTES} minutes')
         return set_retry_interval(update, context)
 
     chat_id = str(update.effective_chat.id)
@@ -350,16 +347,17 @@ def main():
 
     # Start the Bot
     if DEBUG:
+        logger.info('Starting bot in debug polling mode')
         updater.start_polling()
         # Run the bot until you press Ctrl-C or the process receives SIGINT,
         # SIGTERM or SIGABRT. This should be used most of the time, since
         # start_polling() is non-blocking and will stop the bot gracefully.
         updater.idle()
     else:
-        PORT = int(os.environ.get("PORT", "8443"))
+        logger.info('Starting bot in production webhook mode')
         HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
         updater.start_webhook(listen="0.0.0.0",
-                              port=PORT,
+                              port='8443',
                               url_path=BOT_TOKEN)
         updater.bot.set_webhook("https://{}.herokuapp.com/{}".format(HEROKU_APP_NAME, BOT_TOKEN))
         # heroku makes the app sleep after an hour of no incoming requests, so we will ping our app every 20 minutes
