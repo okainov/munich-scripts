@@ -14,7 +14,7 @@ Please note the script **does not perform appointment booking** (see [#4](https:
 
 ## Telegram bot
 
-There is a Telegram bot at [@MunichTerminBot](https://t.me/MunichTerminBot) using `termin.py` functionality. The bot is written using [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library. Source code is also in this repo, `tg_bot.py`.
+There is a Telegram bot at [@MunichTerminBot](https://t.me/MunichTerminBot) using `termin_api.py` functionality. The bot is written using [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library. Source code is also in this repo, `tg_bot.py`.
 
 ### Development
 

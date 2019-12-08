@@ -47,11 +47,26 @@ class Buro(metaclass=Meta):
         raise NotImplementedError
 
     @staticmethod
+    def get_id():
+        """
+        :return: machine-readable unique ID of the buro
+        """
+        return 'baseburo'
+
+    @staticmethod
     def get_typical_appointments() -> list:
         """
         :return: list of tuples (<Name of appointment>, <index>)
         """
         return []
+
+    @staticmethod
+    def get_buro_by_id(buro_id):
+        for buroClass in Buro.__subclasses__():
+            if buroClass.get_id() == buro_id:
+                return buroClass()
+
+        return None
 
 
 class DMV(Buro):
@@ -75,6 +90,13 @@ class DMV(Buro):
             res.append((index, DMV.get_available_appointment_types()[index]))
         return res
 
+    @staticmethod
+    def get_id():
+        """
+        :return: machine-readable unique ID of the buro
+        """
+        return 'fs'
+
 
 class CityHall(Buro):
     @staticmethod
@@ -96,6 +118,13 @@ class CityHall(Buro):
         for index in [0, 1, 2, 3, 4]:
             res.append((index, CityHall.get_available_appointment_types()[index]))
         return res
+
+    @staticmethod
+    def get_id():
+        """
+        :return: machine-readable unique ID of the buro
+        """
+        return 'bb'
 
 
 class ForeignLabor(Buro):
@@ -119,6 +148,13 @@ class ForeignLabor(Buro):
             res.append((index, ForeignLabor.get_available_appointment_types()[index]))
         return res
 
+    @staticmethod
+    def get_id():
+        """
+        :return: machine-readable unique ID of the buro
+        """
+        return 'abh'
+
 
 class KFZ(Buro):
     @staticmethod
@@ -140,6 +176,13 @@ class KFZ(Buro):
         for index in [0, 1, 2, 21]:
             res.append((index, KFZ.get_available_appointment_types()[index]))
         return res
+
+    @staticmethod
+    def get_id():
+        """
+        :return: machine-readable unique ID of the buro
+        """
+        return 'kfz'
 
 
 def write_response_to_log(txt):
