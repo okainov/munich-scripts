@@ -18,40 +18,36 @@ There is a Telegram bot at [@MunichTerminBot](https://t.me/MunichTerminBot) usin
 
 ### Development
 
-By default bot runs as webhook configured for Heroku. For local development it's easier to use polling. In order to get it, just set `DEBUG = True` in one of first lines of the script.
+By default bot runs as webhook configured for personal web server. For local development it's easier to use polling. In order to get it, just set `DEBUG = True` in one of first lines of the script.
 
 ### Bot deployment
 
-Bot is hosted on Heroku, running in Docker and automatic deploy from `master` branch of this repo is set, no action should be required.
+Bot is hosted on personal web server, running in Docker and automatic deploy from `master` branch of this repo is set, no action should be required.
 
 #### Manual deployment
 
 Similar to one of basic [manuals](https://medium.com/python4you/creating-telegram-bot-and-deploying-it-on-heroku-471de1d96554). 
 
 Pre-requisites:
- 
- - Heroku CLI installed.
- - `TG_TOKEN` environment variable is set in Heroku settings
- - `HEROKU_APP_NAME` environment variable is set in Heroku settings.
 
- If you want to enable Elastic statistics, then additionally set following variables:
+ - `TG_TOKEN` environment variable is set in `.env` file
+
+ If you want to enable Elastic statistics, then additionally set following variables to non-empty value:
 
  - `ELASTIC_HOST` - hostname where ELK stack is deployed
  - `ELASTIC_USER` - ElasticSearch username
  - `ELASTIC_PASS` - ElasticSearch password
 
- Alternatively, you can disable metrics collection by setting `COLLECT_METRICS` to `False`
 
 Commands for manual deploy
 
-    heroku login
-    heroku container:login
-    heroku container:push --app munich-termin-bot web
-    heroku container:release --app munich-termin-bot web
+    git pull
+    docker-compose build
+    docker-compose up -d
     
 Shortly after deploy make sure everything is running
 
-    heroku logs --tail --app munich-termin-bot
+    docker-compose logs -f
 
 ## Script usage
 
@@ -63,6 +59,6 @@ Edit script content and select what type of appointments you actually need:
 
 Run the script
 
-    python3 termin.py
+    python3 termin_api.py
 
 Output will be printed in the console
