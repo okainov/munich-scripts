@@ -37,8 +37,6 @@ def selecting_buro(update, context):
     buttons = []
     deps = termin.Buro.__subclasses__()
 
-    user_id = str(update.effective_user.id)
-
     for dep in deps:
         buttons.append(InlineKeyboardButton(text=dep.get_name(), callback_data=dep.__name__))
     custom_keyboard = [buttons]
