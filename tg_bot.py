@@ -5,11 +5,13 @@ import os
 
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
+from telegram import Bot, Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.ext.callbackqueryhandler import CallbackQueryHandler
 from telegram.ext.conversationhandler import ConversationHandler
 from telegram.inline.inlinekeyboardbutton import InlineKeyboardButton
 from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
+from telegram.utils.request import Request
 
 import termin
 from metrics import MetricCollector
@@ -21,7 +23,7 @@ DEBUG = False
 COLLECT_METRICS = not DEBUG
 
 # Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -203,7 +205,7 @@ def print_available_termins(update, context):
         print_unsubscribe_button(msg)
 
 
-def start_interval_checking(update, context):
+def start_interval_checking(update: Update, context):
     """
     Schedules a job for user which will check available appointments by interval
     """
@@ -222,19 +224,21 @@ def start_interval_checking(update, context):
         msg.reply_text(f'Interval should be greater or equals than {MIN_CHECK_INTERVAL} minutes')
         return set_retry_interval(update, context)
 
-    user_id = str(update.effective_user.id)
+    chat_id = str(update.effective_chat.id)
 
     # User cannot have two or more subscriptions
-    if user_id in scheduled_jobs:
+    if chat_id in scheduled_jobs:
         msg.reply_text(
             '⚠️ You had some subscription already. In order to activate the new check, I have removed the old one.')
-        remove_job(user_id)
+        remove_job(chat_id)
 
-    scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=user_id)
-    scheduled_jobs[user_id] = datetime.datetime.now()
+    scheduler.add_job(print_available_termins, 'interval', (update, context), minutes=int(minutes), id=chat_id)
+    scheduled_jobs[chat_id] = datetime.datetime.now()
 
+    logger.info('Subscription for %s-%s created with interval %s' % (
+        context.user_data['buro'], context.user_data['termin_type'], minutes))
     metric_collector.log_subscription(buro=context.user_data['buro'], appointment=context.user_data['termin_type'],
-                                      interval=minutes, user=int(user_id))
+                                      interval=minutes, user=int(chat_id))
 
     msg.reply_text(f"Ok, I've started subscription with checking interval {minutes} minutes\n"
                    "I will notify you if something is available")
@@ -262,15 +266,15 @@ def print_subscription_status(update, context):
     Prints current subscription status
     """
 
-    user_id = str(update.effective_user.id)
+    chat_id = str(update.effective_chat.id)
     msg = update.message
 
     # check if exists a scheduled job
-    if user_id not in scheduled_jobs:
+    if chat_id not in scheduled_jobs:
         return
 
     # define subscription limit 
-    subscription_limit = scheduled_jobs[user_id].date() + datetime.timedelta(days=7)
+    subscription_limit = scheduled_jobs[chat_id].date() + datetime.timedelta(days=7)
 
     # format date 
     date_object = subscription_limit.strftime("%d-%m-%Y")
@@ -283,17 +287,18 @@ def print_subscription_status(update, context):
 
 
 def stop_checking(update, context):
-    user_id = str(update.effective_user.id)
-    remove_job(user_id)
+    chat_id = str(update.effective_chat.id)
+    remove_job(chat_id)
     return selecting_buro(update, context)
 
 
-def remove_job(user_id):
+def remove_job(chat_id: str):
     # if user does not have a subscription, we want to avoid an error
-    if user_id in scheduled_jobs.keys():
-        scheduled_jobs.pop(user_id, None)
-        # msg.reply_text('You were unsubscribed successfully.') # I couldn't manage to make it print, help here!
-        scheduler.remove_job(user_id)
+    if chat_id in scheduled_jobs.keys():
+        scheduled_jobs.pop(chat_id, None)
+        get_bot().send_message(chat_id=chat_id, text='You were unsubscribed successfully')
+
+        scheduler.remove_job(chat_id)
 
 
 def ping_myself_and_clear_jobs(app_name):
@@ -303,9 +308,15 @@ def ping_myself_and_clear_jobs(app_name):
 
     # remove jobs scheduled more than a week ago
     to_remove = list(k for k, v in scheduled_jobs.items() if (datetime.datetime.now() - v).days >= 7)
-    for user_id in to_remove:
-        remove_job(user_id)
-        logger.info('Job for user "%s" removed since it was scheduled more than a week ago', user_id)
+    for chat_id in to_remove:
+        remove_job(chat_id)
+        logger.info('Job for chat "%s" removed since it was scheduled more than a week ago', chat_id)
+
+
+def get_bot():
+    # Default size from the library, 4 workers + 4 additional
+    request = Request(con_pool_size=8)
+    return Bot(token=BOT_TOKEN, request=request)
 
 
 def main():
@@ -313,7 +324,8 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    updater = Updater(BOT_TOKEN, use_context=True)
+
+    updater = Updater(bot=get_bot(), use_context=True)
     dp = updater.dispatcher
 
     conv_handler = ConversationHandler(
