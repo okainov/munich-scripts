@@ -33,6 +33,7 @@ SELECTING_TERMIN_TYPE, QUERING_TERMINS, SCHEDULE_APPOINTMENT, SELECT_INTERVAL, S
 scheduler = BackgroundScheduler()
 scheduled_jobs = {}
 
+
 def selecting_buro(update, context):
     buttons = []
     deps = termin.Buro.__subclasses__()
@@ -256,11 +257,11 @@ def print_unsubscribe_button(msg):
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
 
 
-def print_subscription_status(update, context): 
+def print_subscription_status(update, context):
     """
     Prints current subscription status
     """
-    
+
     user_id = str(update.effective_user.id)
     msg = update.message
 
@@ -276,7 +277,7 @@ def print_subscription_status(update, context):
 
     # send subscription details message
     msg.reply_text('Current subscription details:\n\n - Department: %s \n\n - Type: %s \n\n - Until: %s \n' % (
-            context.user_data['buro'], context.user_data['termin_type'], date_object))
+        context.user_data['buro'], context.user_data['termin_type'], date_object))
 
     return
 
