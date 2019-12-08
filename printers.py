@@ -62,7 +62,7 @@ def notify_about_termins(chat_id, buro, termin, created_at):
         for caption, date, time in appointments:
             bot.send_message(chat_id=chat_id, text='The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
-        bot.send_message(chat_id=chat_id, text='Please book your appointment here: %s' % department._get_base_page())
+        bot.send_message(chat_id=chat_id, text='Please book your appointment here: %s' % department.get_frame_url())
         print_unsubscribe_button(chat_id)
 
 
@@ -176,7 +176,7 @@ def print_available_termins(update, context, print_if_none=False):
         for caption, date, time in appointments:
             msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
                 caption, date, '\n'.join(time)))
-        msg.reply_text('Please book your appointment here: %s' % department._get_base_page())
+        msg.reply_text('Please book your appointment here: %s' % department.get_frame_url())
         print_subscription_status_for_termin(update, context)
     elif print_if_none:
         msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
