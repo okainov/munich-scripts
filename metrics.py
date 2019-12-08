@@ -6,13 +6,14 @@ import termin
 
 
 class MetricCollector:
-    def __init__(self, host, user, password, debug_mode=False):
-        self.debug = debug_mode
-        self.elastic = elasticsearch.Elasticsearch([{'host': host, 'port': 9200}],
-                                                   http_auth=(user, password))
+    def __init__(self, host, user, password, port=9200):
+        self.elastic = None
+        if host and password and user and port:
+            self.elastic = elasticsearch.Elasticsearch([{'host': host, 'port': port}],
+                                                       http_auth=(user, password))
 
     def _send(self, index, body):
-        if not self.debug:
+        if self.elastic is not None:
             self.elastic.index(index=index, body=body)
 
     def log_search(self, user: int, buro: termin.Buro, appointment: str):
