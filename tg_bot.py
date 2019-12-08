@@ -8,7 +8,7 @@ from telegram.ext.conversationhandler import ConversationHandler
 
 import job_storage
 import utils
-from handlers import main_handler, termin_type_handler, quering_termins_handler, interval_handler
+from handlers import main_handler, termin_type_handler, quering_termins_handler, interval_handler, stat_handler
 from metrics import MetricCollector
 from states import MAIN, SELECTING_TERMIN_TYPE, QUERING_TERMINS, SCHEDULE_APPOINTMENT, SELECT_INTERVAL
 from utils import get_bot
@@ -35,7 +35,8 @@ def main():
     dp = updater.dispatcher
 
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', main_handler, pass_user_data=True)],
+        entry_points=[CommandHandler('start', main_handler, pass_user_data=True),
+                      CommandHandler('stats', stat_handler, pass_user_data=True)],
 
         states={
             MAIN: [CallbackQueryHandler(main_handler, pass_user_data=True)],

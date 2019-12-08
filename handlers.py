@@ -3,7 +3,8 @@ from telegram import Update
 import job_storage
 import termin_api
 import utils
-from printers import print_termin_type_message, print_main_message, print_quering_message, print_subscribe_message
+from printers import print_termin_type_message, print_main_message, print_quering_message, print_subscribe_message, \
+    print_stat_message
 from states import MAIN, SELECTING_TERMIN_TYPE, QUERING_TERMINS, SELECT_INTERVAL
 
 
@@ -42,6 +43,13 @@ def main_handler(update: Update, context):
             return SELECTING_TERMIN_TYPE
     else:
         return main_helper(update, context)
+
+
+
+
+def stat_handler(update: Update, context):
+    print_stat_message(update, context)
+    return main_helper(update, context)
 
 
 def termin_type_handler(update: Update, context):

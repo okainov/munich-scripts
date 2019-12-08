@@ -110,10 +110,24 @@ def print_main_message(update, context):
     msg = get_msg(update)
 
     msg.reply_text(
-        'Hi! Here are available departments. Please select one:',
+        'Here are available departments. Please select one:',
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
 
     print_subscription_status(update, context)
+
+
+def print_stat_message(update, context):
+    msg = get_msg(update)
+    all_jobs = [x for x in job_storage.get_jobs() if 'chat_id' in x.kwargs]
+    average_interval = sum([x.trigger.interval.seconds for x in all_jobs]) / 60 / len(all_jobs)
+
+    termin_list = [x.kwargs['termin'] for x in all_jobs]
+    most_popular_termin = max(set(termin_list), key=lambda x: termin_list.count(x))
+
+    msg.reply_text(f'ℹ️ Some piece of statistics:\n\n'
+                   f'{len(all_jobs)} active subscription(s)\n'
+                   f'{average_interval} min average interval\n'
+                   f'{most_popular_termin} is the most popular termin')
 
 
 def print_termin_type_message(update, context):
