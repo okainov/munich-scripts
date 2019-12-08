@@ -29,6 +29,10 @@ def init_scheduler():
     scheduler.start()
     if not scheduler.get_job('cleanup'):
         scheduler.add_job(clear_jobs, "interval", minutes=30, id="cleanup")
+    else:
+        # Just to make sure interval is always correct here
+        utils.get_logger().info("Rescheduling cleanup job...")
+        scheduler.reschedule_job('cleanup', trigger='interval', minutes=30)
 
 
 def add_subscription(update, context, interval):
