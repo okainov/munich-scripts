@@ -10,5 +10,8 @@ services:
       - ELASTIC_HOST=${ELASTIC_HOST}
       - ELASTIC_USER=${ELASTIC_USER}
       - ELASTIC_PASS=${ELASTIC_PASS}
+      - HOST_URL=${HOST_URL}
+    volumes:
+      - ./jobs.sqlite:/termin/jobs.sqlite
     ports:
       - "8443:8443"
