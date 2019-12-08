@@ -29,7 +29,7 @@ def print_subscription_status(update, context):
 
     if subscription:
         subscription_limit = subscription.kwargs['created_at'] + datetime.timedelta(days=7)
-        date_object = subscription_limit.strftime("%d-%m-%Y")
+        date_object = subscription_limit.strftime("%d-%m-%Y %H:%M:%S")
 
         department = Buro.get_buro_by_id(subscription.kwargs['buro'])
         msg.reply_text(
