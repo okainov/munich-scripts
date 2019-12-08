@@ -18,7 +18,7 @@ BOT_TOKEN = os.getenv("TG_TOKEN")
 MIN_CHECK_INTERVAL = 15
 
 DEBUG = False
-COLLECT_METRICS = True
+COLLECT_METRICS = not DEBUG
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
