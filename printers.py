@@ -91,12 +91,18 @@ def print_subscription_status_for_termin(update, context):
 
 
 def print_main_message(update, context):
-    buttons = []
     deps = Buro.__subclasses__()
 
-    for dep in deps:
+    MAX_BURO_IN_ROW = 2
+    custom_keyboard = []
+    buttons = []
+    for i, dep in enumerate(deps):
         buttons.append(InlineKeyboardButton(text=dep.get_name(), callback_data=dep.__name__))
-    custom_keyboard = [buttons]
+        if i % MAX_BURO_IN_ROW == MAX_BURO_IN_ROW - 1:
+            custom_keyboard.append(buttons)
+            buttons = []
+    if buttons:
+        custom_keyboard.append(buttons)
 
     if 'buro' in context.user_data and 'termin_type' in context.user_data:
         custom_keyboard.append([InlineKeyboardButton(text='Reuse last selection', callback_data='_REUSE')])
