@@ -36,6 +36,7 @@ scheduled_jobs = {}
 def selecting_buro(update, context):
     buttons = []
     deps = termin.Buro.__subclasses__()
+
     for dep in deps:
         buttons.append(InlineKeyboardButton(text=dep.get_name(), callback_data=dep.__name__))
     custom_keyboard = [buttons]
@@ -51,6 +52,8 @@ def selecting_buro(update, context):
     msg.reply_text(
         'Hi! Here are available departments. Please select one:',
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
+
+    print_subscription_status(update, context)
 
     return SELECTING_TERMIN_TYPE
 
@@ -234,6 +237,9 @@ def start_interval_checking(update, context):
 
     msg.reply_text(f"Ok, I've started subscription with checking interval {minutes} minutes\n"
                    "I will notify you if something is available")
+
+    print_subscription_status(update, context)
+
     msg.reply_text("Please note the subscription will be automatically removed after one week "
                    "if not cancelled manually before")
 
@@ -250,6 +256,31 @@ def print_unsubscribe_button(msg):
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
 
 
+def print_subscription_status(update, context): 
+    """
+    Prints current subscription status
+    """
+    
+    user_id = str(update.effective_user.id)
+    msg = update.message
+
+    # check if exists a scheduled job
+    if user_id not in scheduled_jobs:
+        return
+
+    # define subscription limit 
+    subscription_limit = scheduled_jobs[user_id].date() + datetime.timedelta(days=7)
+
+    # format date 
+    date_object = subscription_limit.strftime("%d-%m-%Y")
+
+    # send subscription details message
+    msg.reply_text('Current subscription details:\n\n - Department: %s \n\n - Type: %s \n\n - Until: %s \n' % (
+            context.user_data['buro'], context.user_data['termin_type'], date_object))
+
+    return
+
+
 def stop_checking(update, context):
     user_id = str(update.effective_user.id)
     remove_job(user_id)
@@ -260,6 +291,7 @@ def remove_job(user_id):
     # if user does not have a subscription, we want to avoid an error
     if user_id in scheduled_jobs.keys():
         scheduled_jobs.pop(user_id, None)
+        # msg.reply_text('You were unsubscribed successfully.') # I couldn't manage to make it print, help here!
         scheduler.remove_job(user_id)
 
 
