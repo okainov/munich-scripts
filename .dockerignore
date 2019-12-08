@@ -1,0 +1,6 @@
+# Use Dockerignore as whitelist
+*
+
+!requirements.txt
+# include only .py files
+!*.py
