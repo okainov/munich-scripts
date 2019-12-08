@@ -28,7 +28,7 @@ def clear_jobs():
 def init_scheduler():
     scheduler.start()
     if not scheduler.get_job('cleanup'):
-        scheduler.add_job(clear_jobs, "interval", minutes=3, id="cleanup")
+        scheduler.add_job(clear_jobs, "interval", minutes=30, id="cleanup")
 
 
 def add_subscription(update, context, interval):
