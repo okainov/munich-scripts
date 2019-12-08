@@ -1,3 +1,5 @@
+import datetime
+
 import requests
 import re
 import json
@@ -13,16 +15,24 @@ class Buro(metaclass=Meta):
     Base interface-like class for all departments providing appointments on ...muenchen.de/termin/index.php... page
     """
 
+    appointment_types = None
+    appointment_type_date = None
+
     @classmethod
     def get_available_appointment_types(cls):
         """
         :return: list of available appointment types
         """
+        # Cache appointment type results for one day
+        if cls.appointment_types and (datetime.datetime.now() - cls.appointment_type_date).days < 1:
+            return cls.appointment_types
+
         responce = requests.get(cls.get_frame_url())
         # Search for text CASETYPES. So far the only issue was in "+" sign for CityHall in some service variable,
         #  that's why exclude it from the name
-        types = re.findall('CASETYPES\[([^+]*?)\]', responce.content.decode("utf-8"))
-        return types
+        cls.appointment_types = re.findall('CASETYPES\[([^+]*?)\]', responce.content.decode("utf-8"))
+        cls.appointment_type_date = datetime.datetime.now()
+        return cls.appointment_types
 
     @staticmethod
     def get_frame_url():
