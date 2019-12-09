@@ -45,8 +45,6 @@ def main_handler(update: Update, context):
         return main_helper(update, context)
 
 
-
-
 def stat_handler(update: Update, context):
     print_stat_message(update, context)
     return main_helper(update, context)

@@ -53,10 +53,10 @@ def notify_about_termins(chat_id, buro, termin, created_at):
     appointments = worker.get_available_appointments(department, termin, user_id=str(chat_id))
 
     if appointments is None:
-        bot.send_message(chat_id=chat_id, text=
-        'Seems like appointment title <%s> is not accepted by the buro <%s> any more\nPlease create issue on Github'
-        ' (https://github.com/okainov/munich-scripts/issues/new)' % (
-            termin, department))
+        bot.send_message(chat_id=chat_id,
+                         text=f'Seems like appointment title <{termin}> is not accepted by the buro <%s> any more\n'
+                              'Please create issue on Github (https://github.com/okainov/munich-scripts/issues/new)'
+                              % department.get_name())
 
     if len(appointments) > 0:
         for caption, date, time in appointments:

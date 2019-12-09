@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
-
+from cmreslogging.handlers import CMRESHandler
 from telegram import Bot
 from telegram.utils.request import Request
 
@@ -11,6 +11,12 @@ def get_logger():
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',
                         level=logging.INFO)
     logger = logging.getLogger(__name__)
+    if os.getenv('ELASTIC_HOST') and os.getenv('ELASTIC_USER') and os.getenv('ELASTIC_PASS'):
+        handler = CMRESHandler(hosts=[{'host': os.getenv('ELASTIC_HOST'), 'port': 9200}],
+                               auth_type=CMRESHandler.AuthType.BASIC_AUTH,
+                               auth_details=(os.getenv('ELASTIC_USER'), os.getenv('ELASTIC_PASS')),
+                               es_index_name="munich-tg-logs")
+        logger.addHandler(handler)
     return logger
 
 
