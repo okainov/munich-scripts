@@ -117,6 +117,9 @@ def print_main_message(update, context):
 
 
 def print_stat_message(update, context):
+    chat_id = update.effective_chat.id
+    utils.get_logger().info(f'[{chat_id}] Displaying statistics', extra={'user': chat_id})
+
     msg = get_msg(update)
     all_jobs = [x for x in job_storage.get_jobs() if 'chat_id' in x.kwargs]
     average_interval = sum([x.trigger.interval.seconds for x in all_jobs]) / 60 / len(all_jobs)
