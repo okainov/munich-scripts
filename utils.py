@@ -15,7 +15,8 @@ def get_logger():
         handler = CMRESHandler(hosts=[{'host': os.getenv('ELASTIC_HOST'), 'port': 9200}],
                                auth_type=CMRESHandler.AuthType.BASIC_AUTH,
                                auth_details=(os.getenv('ELASTIC_USER'), os.getenv('ELASTIC_PASS')),
-                               es_index_name="munich-tg-logs")
+                               es_index_name="munich-tg-logs",
+                               index_name_frequency=CMRESHandler.IndexNameFrequency.MONTHLY)
         logger.addHandler(handler)
     return logger
 
