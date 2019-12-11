@@ -41,7 +41,6 @@ def get_available_appointments(department: Buro, termin_type, user_id=0):
             available_appointments.append((caption, first_date, v['appoints'][first_date]))
 
     if not available_appointments:
-        logger.info(f'[{user_id}] Nothing found', extra={'user': user_id})
         metric_collector.log_result(department, place="", appointment=termin_type)
 
     return available_appointments
