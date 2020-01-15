@@ -1,7 +1,7 @@
 # General
 Some useful scripts simplifying bureaucracy, especially when living in Munich, Germany.
 
-# termin.py
+# termin_api.py
 Small tool to show availability of appointments in different Departments of Munich.
 
 Available departments are:
