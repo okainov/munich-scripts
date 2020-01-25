@@ -3,14 +3,8 @@ version: '3'
 services:
   tg-bot:
     build: .
-    environment:
-      - TG_TOKEN=${TG_TOKEN}
-      - DEBUG=${DEBUG}
-      - MIN_CHECK_INTERVAL_MINUTES=${MIN_CHECK_INTERVAL_MINUTES}
-      - ELASTIC_HOST=${ELASTIC_HOST}
-      - ELASTIC_USER=${ELASTIC_USER}
-      - ELASTIC_PASS=${ELASTIC_PASS}
-      - HOST_URL=${HOST_URL}
+    env_file:
+        - .env
     volumes:
       - ./jobs.sqlite:/termin/jobs.sqlite
     ports:
