@@ -90,7 +90,7 @@ class DMV(Buro):
 
     @staticmethod
     def get_frame_url():
-        return 'https://www22.muenchen.de/termin/index.php?loc=FS'
+        return 'https://www22.muenchen.de/view-fs/termin/'
 
     @staticmethod
     def get_typical_appointments() -> list:
@@ -119,7 +119,7 @@ class CityHall(Buro):
 
     @staticmethod
     def get_frame_url():
-        return 'https://www56.muenchen.de/termin/index.php?loc=BB'
+        return 'https://www56.muenchen.de/view-bb-aussenstellen/termin/'
 
     @staticmethod
     def get_typical_appointments() -> list:
@@ -148,7 +148,7 @@ class ForeignLabor(Buro):
 
     @staticmethod
     def get_frame_url():
-        return 'https://www46.muenchen.de/termin/index.php?loc=ABH'
+        return 'https://www46.muenchen.de/view-abh/termin/'
 
     @staticmethod
     def get_typical_appointments() -> list:
@@ -177,7 +177,7 @@ class KFZ(Buro):
 
     @staticmethod
     def get_frame_url():
-        return 'https://www22.muenchen.de/termin/index.php?loc=KFZ'
+        return 'https://www22.muenchen.de/view-kfz/termin/'
 
     @staticmethod
     def get_typical_appointments() -> list:
@@ -206,7 +206,7 @@ class Pension(Buro):
 
     @staticmethod
     def get_frame_url():
-        return 'https://www5.muenchen.de/termin/index.php?loc=VA'
+        return 'https://www5.muenchen.de/view-va/termin/'
 
     @staticmethod
     def get_typical_appointments() -> list:
