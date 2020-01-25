@@ -11,7 +11,8 @@ def get_logger():
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',
                         level=logging.INFO)
     logger = logging.getLogger(__name__)
-    if os.getenv('ELASTIC_HOST') and os.getenv('ELASTIC_USER') and os.getenv('ELASTIC_PASS'):
+    if os.getenv('ELASTIC_HOST') and os.getenv('ELASTIC_USER') and os.getenv('ELASTIC_PASS') and \
+            os.getenv('SEND_LOGS_TO_ELASTIC'):
         handler = CMRESHandler(hosts=[{'host': os.getenv('ELASTIC_HOST'), 'port': 9200}],
                                auth_type=CMRESHandler.AuthType.BASIC_AUTH,
                                auth_details=(os.getenv('ELASTIC_USER'), os.getenv('ELASTIC_PASS')),
