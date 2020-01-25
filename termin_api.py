@@ -27,10 +27,13 @@ class Buro(metaclass=Meta):
         if cls.appointment_types and (datetime.datetime.now() - cls.appointment_type_date).days < 1:
             return cls.appointment_types
 
-        responce = requests.get(cls.get_frame_url())
+        response = requests.get(cls.get_frame_url())
+        # Cut not needed content making search more complicated, we need only part in (after) WEB_APPOINT_CASETYPELIST div
+        inner_div = \
+            re.findall('WEB_APPOINT_CASETYPELIST.*', response.content.decode("utf-8"), re.MULTILINE | re.DOTALL)[0]
         # Search for text CASETYPES. So far the only issue was in "+" sign for CityHall in some service variable,
         #  that's why exclude it from the name
-        cls.appointment_types = re.findall('CASETYPES\[([^+]*?)\]', responce.content.decode("utf-8"))
+        cls.appointment_types = re.findall('CASETYPES\[([^+]*?)\]', inner_div)
         cls.appointment_type_date = datetime.datetime.now()
         return cls.appointment_types
 
