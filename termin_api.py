@@ -243,12 +243,15 @@ def get_termins(buro, termin_type):
     # Session is required to keep cookies between requests
     s = requests.Session()
     # First request to get and save cookies
-    s.post(buro.get_frame_url())
+    first_page = s.post(buro.get_frame_url())
+    token = re.search('FRM_CASETYPES_token" value="(.*?)"', first_page.text).group(1)
 
     termin_data = {
         'CASETYPES[%s]' % termin_type: 1,
         'step': 'WEB_APPOINT_SEARCH_BY_CASETYPES',
+        'FRM_CASETYPES_token': token,
     }
+
     response = s.post(buro.get_frame_url(), termin_data)
     txt = response.text
 
