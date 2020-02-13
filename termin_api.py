@@ -244,7 +244,10 @@ def get_termins(buro, termin_type):
     s = requests.Session()
     # First request to get and save cookies
     first_page = s.post(buro.get_frame_url())
-    token = re.search('FRM_CASETYPES_token" value="(.*?)"', first_page.text).group(1)
+    try:
+        token = re.search('FRM_CASETYPES_token" value="(.*?)"', first_page.text).group(1)
+    except AttributeError:
+        token = None
 
     termin_data = {
         'CASETYPES[%s]' % termin_type: 1,
