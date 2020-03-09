@@ -151,7 +151,9 @@ class ForeignLabor(Buro):
 
     @staticmethod
     def get_frame_url():
-        return 'https://www46.muenchen.de/view-abh/termin/'
+        # This is just some random cts because ABH website blocks requests without it. However
+        #  it doesn't make any difference for requesting
+        return 'https://www46.muenchen.de/view-abh/termin/?cts=1064108'
 
     @staticmethod
     def get_typical_appointments() -> list:
@@ -160,6 +162,61 @@ class ForeignLabor(Buro):
         for index in [0, 4, 9]:
             res.append((index, ForeignLabor.get_available_appointment_types()[index]))
         return res
+
+    @classmethod
+    def get_available_appointment_types(cls):
+        return [
+            # cts=1080627
+            'Aufenthaltserlaubnis Blaue Karte EU',
+            'Aufenthaltserlaubnis Blaue Karte EU (inländ. Hochschulabsolvent)',
+            'Aufenthaltserlaubnis für Forschende',
+            'Aufenthaltserlaubnis für Gastwissenschaftler, wissenschaftliche Mitarbeiter',
+            'Aufenthaltserlaubnis zum Studium',
+            'Aufenthaltserlaubnis zur Studienvorbereitung',
+            'Aufenthaltserlaubnis für Doktoranden',
+            'Fachrichtungswechsel',
+            'Facharztausbildung',
+            'Niederlassungserlaubnis allgemein',
+            'Niederlassungserlaubnis Blaue Karte EU - Beratung/ Antragstellung',
+            'Aufenthaltserlaubnis zur Beschäftigung (Fachkräfte / Mangelberufe)',
+            'Aufenthaltserlaubnis zur Arbeitsplatzsuche',
+            'Selbständige und freiberufliche Erwerbstätigkeit',
+            'Ehegattennachzug zum Drittstaatsangehörigen',
+            'Eigenständiges Aufenthaltsrecht',
+            'Aufenthaltserlaubnis für Kinder',
+            'Familiennachzug in Ausnahmefällen',
+            'Familiennachzug (SCIF)',
+            'Familiennachzug (Stu)',
+            'Verpflichtungserklärung (langfristige Aufenthalte)',
+            'Verpflichtungserklärung (kurzfristige Aufenthalte)',
+            'Erlöschen des Aufenthaltstitels, § 51 AufenthG',
+            'Übertrag Aufenthaltstitel in neuen Pass',
+            'Bescheinigung (Aufenthaltsstatus)',
+            'Aufenthaltserlaubnis für langfristig Aufenthaltsberechtigte',
+            'Niederlassungserlaubnis für Familienangehörige von Deutschen',
+            # cts=1064109
+            'Niederlassungserlaubnis ab 16 Jahren',
+            'Aufenthaltserlaubnis zur betrieblichen Ausbildung',
+            'Aufenthaltserlaubnis zur Beschäftigung',
+            'Niederlassungserlaubnis Asyl / int. Schutzberechtigte',
+            'Familiennachzug zu EU-Staatsangehörigen',
+            'Daueraufenthaltsbescheinigung',
+            'Abholung elektronischer Aufenthaltstitel  (eAT)',
+            'Abholung elektronischer Reiseausweis (eRA)',
+            'Schülersammelliste',
+            'Aufenthaltserlaubnis aus humanitären Gründen',
+            'Medizinische Behandlung (Privatpatienten)',
+            'Medizinische Behandlung (Botschaftspatienten)',
+            'Werkverträge',
+            'Firmenkunden',
+            'Aufenthaltserlaubnis zur Arbeitsplatzsuche (16 V)',
+            'Niederlassungserlaubnis für Hochqualifizierte',
+            'Änderung der Nebenbestimmungen (AE)',
+            'Niederlassungserlaubnis für Absolventen dt. Hochschulen',
+            'Beratung allgemein',
+            'Familiennachzug zu dt. Staatsangehörigen',
+            'Aufenthaltserlaubnis zum Deutschintensivkurs',
+        ]
 
     @staticmethod
     def get_id():
@@ -294,7 +351,7 @@ if __name__ == '__main__':
     # appointments = get_termins(CityHall, 'An- oder Ummeldung - Einzelperson')
 
     # # Example for NE with Blue Card
-    # appointments = get_termins(ForeignLabor, 'Niederlassungserlaubnis allgemein')
+    # appointments = get_termins(ForeignLabor, 'Werkverträge')
 
     # # Example for KFZ and car registration
     # appointments = get_termins(KFZ, 'ZUL Fabrikneues Fahrzeug')

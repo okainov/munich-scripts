@@ -55,8 +55,12 @@ def notify_about_termins(chat_id, buro, termin, created_at):
     if appointments is None:
         bot.send_message(chat_id=chat_id,
                          text=f'Seems like appointment title <{termin}> is not accepted by the buro <%s> any more\n'
-                              'Please create issue on Github (https://github.com/okainov/munich-scripts/issues/new)'
+                              'Please check of issues on Github and create one if not reported yet '
+                              '(https://github.com/okainov/munich-scripts/issues/new)\n'
+                              'In the meantime, we\'ve removed this subscription in order to prevent sending '
+                              'more of such useless messages :( Please come back later'
                               % department.get_name())
+        job_storage.remove_subscription(chat_id)
 
     if len(appointments) > 0:
         for caption, date, time in appointments:
@@ -185,7 +189,11 @@ def print_available_termins(update, context, print_if_none=False):
 
     if appointments is None:
         msg.reply_text(
-            'Seems like appointment title <%s> is not accepted by the buro <%s> any more\nPlease create issue on Github'
+            'Seems like appointment title <%s> is not accepted by the buro <%s> any more\n'
+            'Possible reasons:\n'
+            '- The buro has updated their appointments page and bot requires a fix\n'
+            '- Our data about this appointment is out-of-date\n'
+            'Please check for issues on Github and create a new one if needed'
             ' (https://github.com/okainov/munich-scripts/issues/new)' % (
                 termin_type_str, department))
 
