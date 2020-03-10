@@ -8,9 +8,10 @@ from telegram.ext.conversationhandler import ConversationHandler
 
 import job_storage
 import utils
-from handlers import main_handler, termin_type_handler, quering_termins_handler, interval_handler, stat_handler
+from handlers import main_handler, termin_type_handler, quering_termins_handler, deadline_handler, interval_handler, \
+    stat_handler
 from metrics import MetricCollector
-from states import MAIN, SELECTING_TERMIN_TYPE, QUERING_TERMINS, SCHEDULE_APPOINTMENT, SELECT_INTERVAL
+from states import MAIN, SELECTING_TERMIN_TYPE, QUERING_TERMINS, SCHEDULE_APPOINTMENT, SELECT_DEADLINE, SELECT_INTERVAL
 from utils import get_bot
 
 BOT_TOKEN = os.getenv("TG_TOKEN")
@@ -43,6 +44,7 @@ def main():
             SELECTING_TERMIN_TYPE: [CallbackQueryHandler(termin_type_handler, pass_user_data=True)],
             QUERING_TERMINS: [CallbackQueryHandler(quering_termins_handler, pass_user_data=True)],
             SCHEDULE_APPOINTMENT: [CallbackQueryHandler(interval_handler, pass_user_data=True)],
+            SELECT_DEADLINE: [MessageHandler(Filters.text, deadline_handler)],
             SELECT_INTERVAL: [MessageHandler(Filters.text, interval_handler)],
         },
 
