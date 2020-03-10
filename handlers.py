@@ -1,11 +1,14 @@
+import datetime
+import sys
+
 from telegram import Update
 
 import job_storage
 import termin_api
 import utils
-from printers import print_termin_type_message, print_main_message, print_quering_message, print_subscribe_message, \
-    print_stat_message
-from states import MAIN, SELECTING_TERMIN_TYPE, QUERING_TERMINS, SELECT_INTERVAL
+from printers import print_termin_type_message, print_main_message, print_quering_message, print_deadline_message, \
+    print_subscribe_message, print_stat_message
+from states import MAIN, SELECTING_TERMIN_TYPE, QUERING_TERMINS, SELECT_DEADLINE, SELECT_INTERVAL
 
 
 def remove_subscription_helper(update: Update, context):
@@ -73,13 +76,34 @@ def quering_termins_handler(update: Update, context):
             return main_helper(update, context)
 
         elif update.callback_query.data == 'subscribe':
-            print_subscribe_message(update, context)
-            return SELECT_INTERVAL
+            print_deadline_message(update, context)
+            return SELECT_DEADLINE
 
         elif update.callback_query.data == '_STOP':
             return remove_subscription_helper(update, context)
     else:
         return query_termins_helper(update, context)
+
+
+def deadline_handler(update: Update, context):
+    msg = update.message
+    days = msg.text
+
+    valid_deadline = True
+    try:
+        if int(days) < 1 or sys.maxsize < int(days):
+            valid_deadline = False
+    except ValueError:
+        valid_deadline = False
+
+    if not valid_deadline:
+        msg.reply_text('Deadline must be a positive integer.')
+        return SELECT_DEADLINE
+
+    context.user_data['deadline'] = datetime.datetime.now() + datetime.timedelta(days=int(days))
+
+    print_subscribe_message(update, context)
+    return SELECT_INTERVAL
 
 
 def interval_handler(update: Update, context):
