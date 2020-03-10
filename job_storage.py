@@ -41,8 +41,11 @@ def add_subscription(update, context, interval):
 
     buro = context.user_data['buro']
     termin = context.user_data['termin_type']
+    deadline = context.user_data['deadline']
+    
     chat_id = str(update.effective_chat.id)
-    kwargs = {'chat_id': chat_id, 'buro': buro.get_id(), 'termin': termin, 'created_at': datetime.datetime.now()}
+    kwargs = {'chat_id': chat_id, 'buro': buro.get_id(), 'termin': termin, 'created_at': datetime.datetime.now(),
+              'deadline': deadline}
     scheduler.add_job(printers.notify_about_termins, 'interval', kwargs=kwargs, minutes=int(interval),
                       id=chat_id)
 

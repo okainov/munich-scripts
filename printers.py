@@ -29,16 +29,18 @@ def print_subscription_status(update, context):
 
     if subscription:
         subscription_limit = subscription.kwargs['created_at'] + datetime.timedelta(days=7)
-        date_object = subscription_limit.strftime("%d-%m-%Y %H:%M:%S")
+        subscription_limit_date_time = subscription_limit.strftime("%d-%m-%Y %H:%M:%S")
+        deadline = subscription.kwargs['deadline'].strftime("%d-%m-%Y")
 
         department = Buro.get_buro_by_id(subscription.kwargs['buro'])
         msg.reply_text(
-            'Current subscription details:\n\n - Department: %s \n - Type: %s \n - Interval: %s \n - Until: %s \n' % (
-                department.get_name(), subscription.kwargs['termin'], subscription.trigger.interval, date_object))
+            'Current subscription details:\n\n - Department: %s \n - Type: %s \n - Interval: %s \n - Until: %s \n - Deadline: %s \n' % (
+                department.get_name(), subscription.kwargs['termin'], subscription.trigger.interval,
+                subscription_limit_date_time, deadline))
         print_unsubscribe_button(chat_id)
 
 
-def notify_about_termins(chat_id, buro, termin, created_at):
+def notify_about_termins(chat_id, buro, termin, created_at, deadline):
     """
     Checks for available termins and prints them if any
     """
@@ -61,6 +63,9 @@ def notify_about_termins(chat_id, buro, termin, created_at):
                               'more of such useless messages :( Please come back later'
                               % department.get_name())
         job_storage.remove_subscription(chat_id)
+
+    appointments = [(caption, date, time) for caption, date, time in appointments if
+                    datetime.datetime.strptime(date, '%Y-%m-%d') <= deadline]
 
     if len(appointments) > 0:
         for caption, date, time in appointments:
@@ -224,6 +229,11 @@ def print_unsubscribe_button(chat_id):
     utils.get_bot().send_message(chat_id,
                                  'To unsubscribe click the button',
                                  reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
+
+
+def print_deadline_message(update, context):
+    msg = get_msg(update)
+    msg.reply_text('Please type deadline in days from now. You will not be notified for appointments later than this.')
 
 
 def print_subscribe_message(update, context):
