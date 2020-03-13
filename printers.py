@@ -30,7 +30,7 @@ def print_subscription_status(update, context):
     if subscription:
         subscription_limit = subscription.kwargs['created_at'] + datetime.timedelta(days=7)
         subscription_limit_date_time = subscription_limit.strftime("%d-%m-%Y %H:%M:%S")
-        deadline = subscription.kwargs['deadline'].strftime("%d-%m-%Y")
+        deadline = subscription.kwargs['deadline'].strftime("%d-%m-%Y") if 'deadline' in subscription.kwargs else '-'
 
         department = Buro.get_buro_by_id(subscription.kwargs['buro'])
         msg.reply_text(
@@ -40,7 +40,7 @@ def print_subscription_status(update, context):
         print_unsubscribe_button(chat_id)
 
 
-def notify_about_termins(chat_id, buro, termin, created_at, deadline):
+def notify_about_termins(chat_id, buro, termin, created_at, deadline=None):
     """
     Checks for available termins and prints them if any
     """
@@ -64,8 +64,9 @@ def notify_about_termins(chat_id, buro, termin, created_at, deadline):
                               % department.get_name())
         job_storage.remove_subscription(chat_id)
 
-    appointments = [(caption, date, time) for caption, date, time in appointments if
-                    datetime.datetime.strptime(date, '%Y-%m-%d') <= deadline]
+    if deadline is not None:
+        appointments = [(caption, date, time) for caption, date, time in appointments if
+                        datetime.datetime.strptime(date, '%Y-%m-%d') <= deadline]
 
     if len(appointments) > 0:
         for caption, date, time in appointments:
