@@ -6,4 +6,4 @@ SQLAlchemy
 CMRESHandler
 
 # Dependencies for Telegram bot
-python-telegram-bot==12.4.2
+python-telegram-bot==12.5.1
