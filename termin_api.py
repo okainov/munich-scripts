@@ -93,7 +93,7 @@ class DMV(Buro):
 
     @staticmethod
     def get_frame_url():
-        return 'https://www22.muenchen.de/view-fs/termin/'
+        return 'https://terminvereinbarung.muenchen.de/fs/termin/index.php?loc=FS'
 
     @staticmethod
     def get_typical_appointments() -> list:
