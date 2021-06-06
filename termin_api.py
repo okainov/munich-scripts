@@ -153,7 +153,7 @@ class ForeignLabor(Buro):
     def get_frame_url():
         # This is just some random cts because ABH website blocks requests without it. However
         #  it doesn't make any difference for requesting
-        return 'https://www46.muenchen.de/view-abh/termin/?cts=1064108'
+        return 'https://terminvereinbarung.muenchen.de/abh/termin/?cts=1064108'
 
     @staticmethod
     def get_typical_appointments() -> list:
@@ -237,7 +237,7 @@ class KFZ(Buro):
 
     @staticmethod
     def get_frame_url():
-        return 'https://www22.muenchen.de/view-kfz/termin/'
+        return 'https://terminvereinbarung.muenchen.de/kfz/termin/'
 
     @staticmethod
     def get_typical_appointments() -> list:
@@ -266,7 +266,7 @@ class Pension(Buro):
 
     @staticmethod
     def get_frame_url():
-        return 'https://www5.muenchen.de/view-va/termin/'
+        return 'https://terminvereinbarung.muenchen.de/va/termin/'
 
     @staticmethod
     def get_typical_appointments() -> list:
