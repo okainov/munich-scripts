@@ -97,11 +97,15 @@ class DMV(Buro):
 
     @staticmethod
     def get_typical_appointments() -> list:
-        res = []
-        # Driver license exchange - FS Umschreibung Ausländischer FS
-        for index in [11]:
-            res.append((index, DMV.get_available_appointment_types()[index]))
-        return res
+        try:
+            res = []
+            # Driver license exchange - FS Umschreibung Ausländischer FS
+            for index in [2]:
+                res.append((index, DMV.get_available_appointment_types()[index]))
+            return res
+        except IndexError:
+            print('ERROR: cannot return typical appointments for DMV (most probably the indexes have changed)')
+            return []
 
     @staticmethod
     def get_id():
@@ -126,11 +130,15 @@ class CityHall(Buro):
 
     @staticmethod
     def get_typical_appointments() -> list:
-        res = []
-        # Anmeldungs and Abmeldung
-        for index in [0, 1, 2, 3, 4]:
-            res.append((index, CityHall.get_available_appointment_types()[index]))
-        return res
+        try:
+            res = []
+            # Anmeldungs and Abmeldung
+            for index in [0, 1, 2, 3, 4]:
+                res.append((index, CityHall.get_available_appointment_types()[index]))
+            return res
+        except IndexError:
+            print('ERROR: cannot return typical appointments for CityHall (most probably the indexes have changed)')
+            return []
 
     @staticmethod
     def get_id():
@@ -157,11 +165,15 @@ class ForeignLabor(Buro):
 
     @staticmethod
     def get_typical_appointments() -> list:
-        res = []
-        # Blue Card, Students and NE
-        for index in [0, 4, 9]:
-            res.append((index, ForeignLabor.get_available_appointment_types()[index]))
-        return res
+        try:
+            res = []
+            # Blue Card, Students and NE
+            for index in [0, 4, 9]:
+                res.append((index, ForeignLabor.get_available_appointment_types()[index]))
+            return res
+        except IndexError:
+            print('ERROR: cannot return typical appointments for ForeignLabor (most probably the indexes have changed)')
+            return []
 
     @classmethod
     def get_available_appointment_types(cls):
@@ -241,11 +253,15 @@ class KFZ(Buro):
 
     @staticmethod
     def get_typical_appointments() -> list:
-        res = []
-        # Initial registration and address changge
-        for index in [0, 1, 2, 21]:
-            res.append((index, KFZ.get_available_appointment_types()[index]))
-        return res
+        try:
+            res = []
+            # Initial registration and address change
+            for index in [0, 1, 2, 21]:
+                res.append((index, KFZ.get_available_appointment_types()[index]))
+            return res
+        except IndexError:
+            print('ERROR: cannot return typical appointments for KFZ (most probably the indexes have changed)')
+            return []
 
     @staticmethod
     def get_id():
@@ -270,11 +286,15 @@ class Pension(Buro):
 
     @staticmethod
     def get_typical_appointments() -> list:
-        res = []
-        # Pension information for NE
-        for index in [6]:
-            res.append((index, Pension.get_available_appointment_types()[index]))
-        return res
+        try:
+            res = []
+            # Pension information for NE
+            for index in [6]:
+                res.append((index, Pension.get_available_appointment_types()[index]))
+            return res
+        except IndexError:
+            print('ERROR: cannot return typical appointments for Pension (most probably the indexes have changed)')
+            return []
 
     @staticmethod
     def get_id():
