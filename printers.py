@@ -2,9 +2,9 @@ import datetime
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, Message
 
+import job_storage
 import utils
 import worker
-import job_storage
 from termin_api import Buro
 
 
@@ -114,8 +114,9 @@ def print_main_message(update, context):
     msg = get_msg(update)
 
     msg.reply_text(
-        'Here are available departments. Please select one:',
-        reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
+        'Here are available departments\. Please select one:\n'
+        'Please note Ausländerbehörde does not have online Termin bookings any more\. You need to file application online for [Blue Card](https://stadt.muenchen.de/service/info/hauptabteilung-ii-buergerangelegenheiten/1080627/) or for [Niederlassungserlaubnis](https://stadt.muenchen.de/service/info/hauptabteilung-ii-buergerangelegenheiten/1080810/)',
+        reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True), parse_mode='MarkdownV2')
 
     print_subscription_status(update, context)
 
