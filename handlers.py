@@ -144,7 +144,7 @@ def interval_handler(update: Update, context):
 
     msg.reply_text(f"Ok, I've started subscription with checking interval {minutes} minutes\n"
                    "I will notify you if something is available\n"
-                   "Please note the subscription will be automatically removed after one week.\n"
+                   "Please note the subscription will be automatically removed after one month.\n"
                    f"Will notify only about termins on {friendly_deadline} or earlier, "
                    "if not cancelled manually before")
 
