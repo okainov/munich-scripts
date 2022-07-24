@@ -96,7 +96,7 @@ def print_subscription_status_for_termin(update, context):
         custom_keyboard = [buttons]
         msg.reply_text(
             'If you want, you can subscribe for available appointments of this type. '
-            'After then you will receive regular updates about available appointments for a week',
+            'After then you will receive regular updates about available appointments for a month',
             reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True))
 
 

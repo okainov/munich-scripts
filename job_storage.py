@@ -18,9 +18,9 @@ def clear_jobs():
     logger = utils.get_logger()
     logger.info("Cleaning jobs...")
 
-    # remove jobs scheduled more than a week ago
+    # remove jobs scheduled more than a month ago
     for job in scheduler.get_jobs():
-        if 'created_at' in job.kwargs and (datetime.datetime.now() - job.kwargs['created_at']).days >= 7:
+        if 'created_at' in job.kwargs and (datetime.datetime.now() - job.kwargs['created_at']).days >= 30:
             logger.info("Removing job %s" % job.kwargs['chat_id'], extra={'user': job.kwargs['chat_id']})
             remove_subscription(job.kwargs['chat_id'], automatic=True)
 
@@ -60,7 +60,7 @@ def remove_subscription(chat_id, automatic=False):
     if automatic:
         utils.get_logger().info(f'[{chat_id}] Subscription removed since it\'s expired', extra={'user': chat_id})
         utils.get_bot().send_message(chat_id=chat_id,
-                                     text='Subscription was removed since it was created more than a week ago')
+                                     text='Subscription was removed since it was created more than a month ago')
     else:
         utils.get_logger().info(f'[{chat_id}] Subscription removed by request', extra={'user': chat_id})
         utils.get_bot().send_message(chat_id=chat_id, text='You were unsubscribed successfully')
