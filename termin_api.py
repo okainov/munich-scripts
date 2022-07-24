@@ -1,8 +1,8 @@
 import datetime
+import json
+import re
 
 import requests
-import re
-import json
 
 
 class Meta(type):
@@ -34,6 +34,8 @@ class Buro(metaclass=Meta):
         # Search for text CASETYPES. So far the only issue was in "+" sign for CityHall in some service variable,
         #  that's why exclude it from the name
         cls.appointment_types = re.findall('CASETYPES\[([^+]*?)\]', inner_div)
+        # Get rid of duplicates
+        cls.appointment_types = list(set(cls.appointment_types))
         cls.appointment_type_date = datetime.datetime.now()
         return cls.appointment_types
 
@@ -43,6 +45,13 @@ class Buro(metaclass=Meta):
         :return: URL with appointments form
         """
         raise NotImplementedError
+
+    @staticmethod
+    def get_info_message():
+        """
+        :return: Optional text message to be printed before the list of termins
+        """
+        return ''
 
     @staticmethod
     def _get_base_page():
@@ -99,9 +108,9 @@ class DMV(Buro):
     def get_typical_appointments() -> list:
         try:
             res = []
-            # Driver license exchange - FS Umschreibung Ausländischer FS
-            for index in [2]:
-                res.append((index, DMV.get_available_appointment_types()[index]))
+            for i, termin in enumerate(DMV.get_available_appointment_types()):
+                if 'Umschreibung' in termin or 'Abholung' in termin:
+                    res.append((i, termin))
             return res
         except IndexError:
             print('ERROR: cannot return typical appointments for DMV (most probably the indexes have changed)')
@@ -132,9 +141,9 @@ class CityHall(Buro):
     def get_typical_appointments() -> list:
         try:
             res = []
-            # Anmeldungs and Abmeldung
-            for index in [0, 1, 2, 3, 4]:
-                res.append((index, CityHall.get_available_appointment_types()[index]))
+            for i, termin in enumerate(CityHall.get_available_appointment_types()):
+                if 'meldung' in termin:
+                    res.append((i, termin))
             return res
         except IndexError:
             print('ERROR: cannot return typical appointments for CityHall (most probably the indexes have changed)')
@@ -166,8 +175,9 @@ class KFZ(Buro):
         try:
             res = []
             # Initial registration and address change
-            for index in [0, 1, 2, 21]:
-                res.append((index, KFZ.get_available_appointment_types()[index]))
+            for i, termin in enumerate(KFZ.get_available_appointment_types()):
+                if 'Umschreibung' in termin or 'Adress' in termin:
+                    res.append((i, termin))
             return res
         except IndexError:
             print('ERROR: cannot return typical appointments for KFZ (most probably the indexes have changed)')
@@ -187,6 +197,10 @@ class Pension(Buro):
         return 'Versicherungsamt'
 
     @staticmethod
+    def get_info_message():
+        return f'ℹ️ Please note for Wartezeitauskunft there are no appointments available, you must apply online at https://service\.muenchen\.de/intelliform/forms/01/02/02/kontaktformularversicherungsamt/index'
+
+    @staticmethod
     def _get_base_page():
         return 'https://www.muenchen.de/rathaus/terminvereinbarung_va.html'
 
@@ -199,8 +213,9 @@ class Pension(Buro):
         try:
             res = []
             # Pension information for NE
-            for index in [6]:
-                res.append((index, Pension.get_available_appointment_types()[index]))
+            for i, termin in enumerate(Pension.get_available_appointment_types()):
+                if 'Wartezeit' in termin:
+                    res.append((i, termin))
             return res
         except IndexError:
             print('ERROR: cannot return typical appointments for Pension (most probably the indexes have changed)')
@@ -212,6 +227,48 @@ class Pension(Buro):
         :return: machine-readable unique ID of the buro
         """
         return 'va'
+
+
+class KVR(Buro):
+    @staticmethod
+    def get_name():
+        return 'KVR'
+
+    @staticmethod
+    def _get_base_page():
+        return 'https://www.muenchen.de/rathaus/terminvereinbarung_kvr.html'
+
+    @staticmethod
+    def get_frame_url():
+        return 'https://terminvereinbarung.muenchen.de/kvr/termin/?cts=1064437'
+
+    @staticmethod
+    def get_typical_appointments() -> list:
+        try:
+            res = []
+            for index in [0]:
+                res.append((index, KVR.get_available_appointment_types()[index]))
+            return res
+        except IndexError:
+            print('ERROR: cannot return typical appointments for Pension (most probably the indexes have changed)')
+            return []
+
+    @staticmethod
+    def get_id():
+        """
+        :return: machine-readable unique ID of the buro
+        """
+        return 'kvr'
+
+
+class ForeignLabor(Buro):
+    @staticmethod
+    def get_name():
+        return '❌ Ausländerbehörde'
+
+    @staticmethod
+    def get_info_message():
+        return '❌ Please note Ausländerbehörde does not have online Termin bookings any more\. You need to file application online for [Blue Card](https://stadt.muenchen.de/service/info/hauptabteilung-ii-buergerangelegenheiten/1080627/) or for [Niederlassungserlaubnis](https://stadt.muenchen.de/service/info/hauptabteilung-ii-buergerangelegenheiten/1080810/)'
 
 
 def write_response_to_log(txt):
