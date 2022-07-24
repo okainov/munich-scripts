@@ -126,6 +126,10 @@ def print_stat_message(update, context):
 
     msg = get_msg(update)
     all_jobs = [x for x in job_storage.get_jobs() if 'chat_id' in x.kwargs]
+    if not all_jobs:
+        msg.reply_text(f'ℹ️ No active subscriptions')
+        return
+
     average_interval = sum([x.trigger.interval.seconds for x in all_jobs]) / 60 / len(all_jobs)
 
     termin_list = [x.kwargs['termin'] for x in all_jobs]
