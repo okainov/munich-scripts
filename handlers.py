@@ -42,7 +42,11 @@ def main_handler(update: Update, context):
             except AttributeError:
                 return main_helper(update, context)
             context.user_data['buro'] = department
-            print_termin_type_message(update, context)
+            try:
+                print_termin_type_message(update, context)
+            except NotImplementedError:
+                print_main_message(update, context)
+                return MAIN
             return SELECTING_TERMIN_TYPE
     else:
         return main_helper(update, context)
