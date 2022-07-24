@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-
 import sys
+
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.ext.callbackqueryhandler import CallbackQueryHandler
 from telegram.ext.conversationhandler import ConversationHandler
@@ -72,9 +72,8 @@ def main():
             sys.exit(-1)
         updater.start_webhook(listen="0.0.0.0",
                               port='8443',
-                              url_path=BOT_TOKEN)
-        updater.bot.set_webhook("https://{}/{}".format(HOST_URL, BOT_TOKEN))
-        # heroku makes the app sleep after an hour of no incoming requests, so we will ping our app every 20 minutes
+                              url_path=BOT_TOKEN,
+                              webhook_url="https://{}/{}".format(HOST_URL, BOT_TOKEN))
 
 
 if __name__ == '__main__':
