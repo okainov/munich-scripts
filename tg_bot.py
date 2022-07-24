@@ -63,7 +63,6 @@ def main():
         # Run the bot until you press Ctrl-C or the process receives SIGINT,
         # SIGTERM or SIGABRT. This should be used most of the time, since
         # start_polling() is non-blocking and will stop the bot gracefully.
-        updater.idle()
     else:
         logger.info('Starting bot in production webhook mode')
         HOST_URL = os.environ.get("HOST_URL")
@@ -74,6 +73,7 @@ def main():
                               port='8443',
                               url_path=BOT_TOKEN,
                               webhook_url="https://{}/{}".format(HOST_URL, BOT_TOKEN))
+    updater.idle()
 
 
 if __name__ == '__main__':
