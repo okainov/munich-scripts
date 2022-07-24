@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
-from cmreslogging.handlers import CMRESHandler
+from pyeslogging.handlers import PYESHandler
 from telegram import Bot
 from telegram.utils.request import Request
 
@@ -13,11 +13,11 @@ def get_logger():
     logger = logging.getLogger(__name__)
     if os.getenv('ELASTIC_HOST') and os.getenv('ELASTIC_USER') and os.getenv('ELASTIC_PASS') and \
             os.getenv('SEND_LOGS_TO_ELASTIC'):
-        handler = CMRESHandler(hosts=[{'host': os.getenv('ELASTIC_HOST'), 'port': 9200}],
-                               auth_type=CMRESHandler.AuthType.BASIC_AUTH,
+        handler = PYESHandler(hosts=[{'host': os.getenv('ELASTIC_HOST'), 'port': 9200}],
+                               auth_type=PYESHandler.AuthType.BASIC_AUTH,
                                auth_details=(os.getenv('ELASTIC_USER'), os.getenv('ELASTIC_PASS')),
                                es_index_name="munich-tg-logs",
-                               index_name_frequency=CMRESHandler.IndexNameFrequency.MONTHLY)
+                               index_name_frequency=PYESHandler.IndexNameFrequency.MONTHLY)
         logger.addHandler(handler)
     return logger
 

@@ -1,9 +1,9 @@
 # Main dependencies for the script
 requests
 apscheduler
-elasticsearch
+elasticsearch < 8.0.0
 SQLAlchemy
-CMRESHandler
+PYESHandler
 
 # Dependencies for Telegram bot
 python-telegram-bot==13.13
