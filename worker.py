@@ -11,14 +11,14 @@ metric_collector = MetricCollector.get_collector()
 
 
 def get_available_appointments(department: Buro, termin_type, user_id=0):
-    logger.info(f'[{user_id}] Query for <{termin_type}> at %s' % department.get_name(), extra={'user': user_id})
+    logger.info(f'[{user_id}] Query for <{termin_type}> at {department.get_name()}', extra={'user': user_id})
     metric_collector.log_search(user=user_id, buro=department, appointment=termin_type)
 
     appointments = termin_api.get_termins(department, termin_type)
     if appointments is None:
         logger.error(
             f'Seems like appointment title <{termin_type}> is not accepted by the '
-            f'buro <%s> any more:' % department.get_name(), extra={'user': user_id})
+            f'buro <department.get_name()> any more:', extra={'user': user_id})
         return None
 
     # list of tuples: (caption, date, time)
