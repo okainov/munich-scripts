@@ -34,9 +34,7 @@ def print_subscription_status(update, context):
 
         department = Buro.get_buro_by_id(subscription.kwargs['buro'])
         msg.reply_text(
-            'Current subscription details:\n\n - Department: %s \n - Type: %s \n - Interval: %s \n - Until: %s \n - Not later than: %s \n' % (
-                department.get_name(), subscription.kwargs['termin'], subscription.trigger.interval,
-                subscription_limit_date_time, deadline))
+            f'Current subscription details:\n\n - Department: {department.get_name()} \n - Type: {subscription.kwargs["termin"]} \n - Interval: {subscription.trigger.interval} \n - Until: {subscription_limit_date_time} \n - Not later than: {deadline} \n')
         print_unsubscribe_button(chat_id)
 
 
@@ -56,12 +54,12 @@ def notify_about_termins(chat_id, buro, termin, created_at, deadline=None):
 
     if appointments is None:
         bot.send_message(chat_id=chat_id,
-                         text=f'Seems like appointment title <{termin}> is not accepted by the buro <%s> any more\n'
+                         text=f'Seems like appointment title <{termin}> is not accepted by the buro <{department.get_name()}> any more\n'
                               'Please check of issues on Github and create one if not reported yet '
                               '(https://github.com/okainov/munich-scripts/issues/new)\n'
                               'In the meantime, we\'ve removed this subscription in order to prevent sending '
                               'more of such useless messages :( Please come back later'
-                              % department.get_name())
+                         )
         job_storage.remove_subscription(chat_id)
 
     if deadline is not None:
@@ -70,9 +68,10 @@ def notify_about_termins(chat_id, buro, termin, created_at, deadline=None):
 
     if len(appointments) > 0:
         for caption, date, time in appointments:
-            bot.send_message(chat_id=chat_id, text='The nearest appointments at %s are on %s:\n%s' % (
-                caption, date, '\n'.join(time)))
-        bot.send_message(chat_id=chat_id, text='Please book your appointment here: %s' % department.get_frame_url())
+            bot.send_message(chat_id=chat_id,
+                             text=f'The nearest appointments at {caption} are on {date}:\n'
+                                  '%s' % '\n'.join(time))
+        bot.send_message(chat_id=chat_id, text=f'Please book your appointment here: {department.get_frame_url()}')
         print_unsubscribe_button(chat_id)
 
 
@@ -88,8 +87,7 @@ def print_subscription_status_for_termin(update, context):
         date_object = subscription_limit.strftime("%d-%m-%Y")
 
         msg.reply_text(
-            'Subscription with interval %sm is already active until %s \n' % (
-                subscription.trigger.interval, date_object))
+            f'Subscription with interval {subscription.trigger.interval}m is already active until {date_object} \n')
         print_unsubscribe_button(chat_id)
     else:
         buttons = [InlineKeyboardButton(text="Subscribe", callback_data="subscribe")]
@@ -180,7 +178,7 @@ def print_quering_message(update, context):
     termin_type_str = context.user_data['termin_type']
 
     msg.reply_text(
-        'Great, wait a second while I\'m fetching available appointments for %s...' % termin_type_str)
+        f'Great, wait a second while I\'m fetching available appointments for {termin_type_str}...')
 
     print_available_termins(update, context, print_if_none=True)
 
@@ -215,9 +213,9 @@ def print_available_termins(update, context, print_if_none=False):
 
     if len(appointments) > 0:
         for caption, date, time in appointments:
-            msg.reply_text('The nearest appointments at %s are on %s:\n%s' % (
-                caption, date, '\n'.join(time)))
-        msg.reply_text('Please book your appointment here: %s' % department.get_frame_url())
+            msg.reply_text(f'The nearest appointments at {caption} are on {date}:\n'
+                           '%s' % '\n'.join(time))
+        msg.reply_text(f'Please book your appointment here: {department.get_frame_url()}')
         print_subscription_status_for_termin(update, context)
     elif print_if_none:
         msg.reply_text('Unfortunately, everything is booked. Please come back in several days :(')
@@ -234,7 +232,10 @@ def print_unsubscribe_button(chat_id):
 
 def print_deadline_message(update, context):
     msg = get_msg(update)
-    msg.reply_text('Please type deadline in days from now. You will not be notified for appointments later than this. Typically this might be used if you\'ve got a termin in a few months already, but want to get an earlier one. If you don\'t know what to type, use 100 or 365.' )
+    msg.reply_text(
+        'Please type deadline in days from now. You will not be notified for appointments later than this. '
+        'Typically this might be used if you\'ve got a termin in a few months already, '
+        'but want to get an earlier one. If you don\'t know what to type, use 100 or 365.')
 
 
 def print_subscribe_message(update, context):

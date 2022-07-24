@@ -294,7 +294,7 @@ def get_termins(buro, termin_type):
         token = None
 
     termin_data = {
-        'CASETYPES[%s]' % termin_type: 1,
+        f'CASETYPES[{termin_type}]': 1,
         'step': 'WEB_APPOINT_SEARCH_BY_CASETYPES',
         'FRM_CASETYPES_token': token,
     }

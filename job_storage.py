@@ -21,7 +21,7 @@ def clear_jobs():
     # remove jobs scheduled more than a month ago
     for job in scheduler.get_jobs():
         if 'created_at' in job.kwargs and (datetime.datetime.now() - job.kwargs['created_at']).days >= 30:
-            logger.info("Removing job %s" % job.kwargs['chat_id'], extra={'user': job.kwargs['chat_id']})
+            logger.info(f"Removing job {job.kwargs['chat_id']}", extra={'user': job.kwargs['chat_id']})
             remove_subscription(job.kwargs['chat_id'], automatic=True)
 
 
@@ -49,7 +49,7 @@ def add_subscription(update, context, interval):
     scheduler.add_job(printers.notify_about_termins, 'interval', kwargs=kwargs, minutes=int(interval),
                       id=chat_id)
 
-    logger.info(f'[{chat_id}] Subscription for %s-{termin} created with interval {interval}' % buro.get_name(), extra={'user': chat_id})
+    logger.info(f'[{chat_id}] Subscription for {buro.get_name()}-{termin} created with interval {interval}', extra={'user': chat_id})
     metric_collector.log_subscription(buro=buro, appointment=termin, interval=interval, user=int(chat_id))
 
 
