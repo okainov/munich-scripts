@@ -114,8 +114,7 @@ def print_main_message(update, context):
     msg = get_msg(update)
 
     msg.reply_text(
-        'Here are available departments\. Please select one:\n'
-        'Please note Ausländerbehörde does not have online Termin bookings any more\. You need to file application online for [Blue Card](https://stadt.muenchen.de/service/info/hauptabteilung-ii-buergerangelegenheiten/1080627/) or for [Niederlassungserlaubnis](https://stadt.muenchen.de/service/info/hauptabteilung-ii-buergerangelegenheiten/1080810/)',
+        'Here are available departments\. Please select one:',
         reply_markup=InlineKeyboardMarkup(custom_keyboard, one_time_keyboard=True), parse_mode='MarkdownV2')
 
     print_subscription_status(update, context)
@@ -150,6 +149,12 @@ def print_termin_type_message(update, context):
 
     msg.reply_text(
         'Fetching available appointment types...')
+    if info_message := department.get_info_message():
+        msg.reply_text(
+            info_message,
+            parse_mode='MarkdownV2',
+            reply_markup=InlineKeyboardMarkup(buttons, one_time_keyboard=True))
+
     for i, x in department.get_typical_appointments():
         buttons.append([InlineKeyboardButton(text=x, callback_data=i)])
     if department.get_typical_appointments():
@@ -194,13 +199,13 @@ def print_available_termins(update, context, print_if_none=False):
 
     if appointments is None:
         msg.reply_text(
-            'Seems like appointment title <%s> is not accepted by the buro <%s> any more\n'
+            f'Seems like appointment title <{termin_type_str}> is not accepted by the buro <{department}> any more\n'
             'Possible reasons:\n'
             '- The buro has updated their appointments page and bot requires a fix\n'
             '- Our data about this appointment is out-of-date\n'
             'Please check for issues on Github and create a new one if needed'
-            ' (https://github.com/okainov/munich-scripts/issues/new)' % (
-                termin_type_str, department))
+            ' (https://github.com/okainov/munich-scripts/issues/new). '
+            f'Alternatively, please check buro\'s webpage itself at {department.get_frame_url()}')
 
     if len(appointments) > 0:
         for caption, date, time in appointments:
