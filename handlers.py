@@ -91,7 +91,7 @@ def deadline_handler(update: Update, context):
 
     valid_deadline = True
     try:
-        if int(days) < 1 or sys.maxsize < int(days):
+        if int(days) < 1 or int(days) > 365:
             valid_deadline = False
     except ValueError:
         valid_deadline = False
@@ -140,9 +140,12 @@ def interval_handler(update: Update, context):
 
     job_storage.add_subscription(update, context, interval=int(minutes))
 
+    friendly_deadline = context.user_data['deadline'].strftime("%d-%m-%Y")
+
     msg.reply_text(f"Ok, I've started subscription with checking interval {minutes} minutes\n"
                    "I will notify you if something is available\n"
-                   "Please note the subscription will be automatically removed after one week "
+                   "Please note the subscription will be automatically removed after one week.\n"
+                   f"Will notify only about termins on {friendly_deadline} or earlier, "
                    "if not cancelled manually before")
 
     return main_helper(update, context)

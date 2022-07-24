@@ -34,7 +34,7 @@ def print_subscription_status(update, context):
 
         department = Buro.get_buro_by_id(subscription.kwargs['buro'])
         msg.reply_text(
-            'Current subscription details:\n\n - Department: %s \n - Type: %s \n - Interval: %s \n - Until: %s \n - Deadline: %s \n' % (
+            'Current subscription details:\n\n - Department: %s \n - Type: %s \n - Interval: %s \n - Until: %s \n - Not later than: %s \n' % (
                 department.get_name(), subscription.kwargs['termin'], subscription.trigger.interval,
                 subscription_limit_date_time, deadline))
         print_unsubscribe_button(chat_id)
@@ -234,7 +234,7 @@ def print_unsubscribe_button(chat_id):
 
 def print_deadline_message(update, context):
     msg = get_msg(update)
-    msg.reply_text('Please type deadline in days from now. You will not be notified for appointments later than this.')
+    msg.reply_text('Please type deadline in days from now. You will not be notified for appointments later than this. Typically this might be used if you\'ve got a termin in a few months already, but want to get an earlier one. If you don\'t know what to type, use 100 or 365.' )
 
 
 def print_subscribe_message(update, context):
