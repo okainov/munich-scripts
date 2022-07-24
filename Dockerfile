@@ -1,12 +1,12 @@
-FROM python:3.7
+FROM python:3.9
 
-RUN mkdir /termin
+RUN mkdir /app
 
-COPY requirements.txt /termin
+COPY requirements.txt /app
 
-WORKDIR /termin
+WORKDIR /app
 RUN pip install -r requirements.txt
 
-ADD . /termin
+ADD . /app
 
-CMD python /termin/tg_bot.py
+CMD python /app/tg_bot.py
