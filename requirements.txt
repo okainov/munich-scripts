@@ -6,4 +6,4 @@ SQLAlchemy
 PYESHandler
 
 # Dependencies for Telegram bot
-python-telegram-bot==13.13
+python-telegram-bot==20.0
