@@ -4,3 +4,4 @@ __pycache__
 log.txt
 jobs.sqlite
 /venv/
+chars.data
