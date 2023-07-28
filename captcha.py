@@ -2,49 +2,33 @@ import requests
 import zipfile
 import io
 import os
+import pickle
 
 DATA_FILE_PATH = "chars.data"
 
 
 def solve_captcha(captcha):
     chars = get_chars()
-    solution = ""
     captcha = captcha[44:]
+    solution = ""
     while True:
-        found = False
-        for char, data in chars.items():
-            if len(captcha) > len(data) and captcha[:len(data)] == data:
-                solution += char
-                captcha = captcha[len(data):].lstrip(b"\x00")
-                found = True
-                break
-        if not found:
+        char = next((c for c in chars if captcha.startswith(chars[c])), None)
+        if char is None:
             break
+        solution += char
+        captcha = captcha[len(chars[char]) :].lstrip(b"\x00")
     return solution
 
 
 def get_chars():
     if os.path.exists(DATA_FILE_PATH):
         with open(DATA_FILE_PATH, "rb") as data_file:
-            chars = read_chars_from_file(data_file)
+            chars = pickle.load(data_file)
     else:
         chars = download_chars()
-        write_chars_to_file(chars)
+        with open(DATA_FILE_PATH, "wb") as data_file:
+            pickle.dump(chars, data_file)
     return chars
-
-
-def read_chars_from_file(data_file):
-    import pickle
-    dec = pickle.Unpickler(data_file)
-    chars = dec.load()
-    return chars
-
-
-def write_chars_to_file(chars):
-    with open(DATA_FILE_PATH, "wb") as data_file:
-        import pickle
-        enc = pickle.Pickler(data_file)
-        enc.dump(chars)
 
 
 def download_chars():
@@ -55,9 +39,8 @@ def download_chars():
     with zipfile.ZipFile(zip_data) as zip_file:
         for file in zip_file.namelist():
             char = os.path.splitext(os.path.basename(file))[0]
-            if len(char) != 1:
-                continue
-            with zip_file.open(file) as audio_file:
-                data = audio_file.read()[44:]
-                chars[char] = data
+            if len(char) == 1:
+                with zip_file.open(file) as audio_file:
+                    data = audio_file.read()[44:]
+                    chars[char] = data
     return chars
