@@ -4,6 +4,7 @@ import re
 
 import requests
 
+import captcha
 
 class Meta(type):
     def __repr__(cls):
@@ -293,10 +294,14 @@ def get_termins(buro, termin_type):
     except AttributeError:
         token = None
 
+    captcha_response = s.get('https://terminvereinbarung.muenchen.de/bba/securimage/securimage_play.php')
+    code = captcha.solve_captcha(captcha_response.content)
+
     termin_data = {
         f'CASETYPES[{termin_type}]': 1,
         'step': 'WEB_APPOINT_SEARCH_BY_CASETYPES',
         'FRM_CASETYPES_token': token,
+        'captcha_code': code,
     }
 
     response = s.post(buro.get_frame_url(), termin_data)
